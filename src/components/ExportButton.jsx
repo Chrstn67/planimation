@@ -148,7 +148,7 @@ export default function ExportButton({
     // Dimensions de la grille
     const hourHeight = 8; // Hauteur d'une heure en mm
     const dayWidth = contentWidth / 5; // Largeur d'un jour
-    const workingHours = [8, 20]; // Plage horaire 8h-20h
+    const workingHours = [6, 23]; // Plage horaire h-20h
     const gridHeight = (workingHours[1] - workingHours[0]) * hourHeight;
 
     // En-têtes des jours
