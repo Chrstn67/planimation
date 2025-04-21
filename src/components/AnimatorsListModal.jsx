@@ -18,17 +18,22 @@ export default function AnimatorsListModal({
           </button>
         </div>
         <ul className="animators-list">
-          {animators.map((animator) => (
-            <li key={animator.id} className="animator-item">
-              <div>
-                <strong>{animator.name}</strong> — {animator.specialty}
-              </div>
-              <div className="animator-actions">
-                <button onClick={() => onEdit(animator)}>Modifier</button>
-                <button onClick={() => onDelete(animator.id)}>Supprimer</button>
-              </div>
-            </li>
-          ))}
+          {animators
+            .slice() // pour ne pas muter le tableau original
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .map((animator) => (
+              <li key={animator.id} className="animator-item">
+                <div>
+                  <strong>{animator.name}</strong> — {animator.specialty}
+                </div>
+                <div className="animator-actions">
+                  <button onClick={() => onEdit(animator)}>Modifier</button>
+                  <button onClick={() => onDelete(animator.id)}>
+                    Supprimer
+                  </button>
+                </div>
+              </li>
+            ))}
         </ul>
       </div>
     </div>

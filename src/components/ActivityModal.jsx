@@ -207,11 +207,14 @@ export default function ActivityModal({
               onChange={handleAnimatorChange}
               required
             >
-              {animators.map((animator) => (
-                <option key={animator.id} value={animator.id}>
-                  {animator.name} ({animator.specialty})
-                </option>
-              ))}
+              {animators
+                .slice()
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((animator) => (
+                  <option key={animator.id} value={animator.id}>
+                    {animator.name} ({animator.specialty})
+                  </option>
+                ))}
             </select>
           </div>
 

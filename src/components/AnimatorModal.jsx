@@ -63,7 +63,6 @@ export default function AnimatorModal({
               name="specialty"
               value={formData.specialty}
               onChange={handleChange}
-              required
             />
           </div>
 

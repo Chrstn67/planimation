@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef } from "react";
-import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import "../styles/export-button.css";
 
@@ -10,8 +9,6 @@ export default function ExportButton({
   animators,
   currentWeekDates,
 }) {
-  const contentRef = useRef(null);
-
   const getAnimatorNames = (animatorIds) => {
     if (!animatorIds || !Array.isArray(animatorIds) || animatorIds.length === 0)
       return "";
@@ -35,13 +32,7 @@ export default function ExportButton({
       return false;
     }
 
-    // Vérifier que l'activité a toutes les propriétés requises
-    if (
-      !activity.day ||
-      !activity.startTime ||
-      !activity.endTime ||
-      !activity.title
-    ) {
+    if (!activity.day || !activity.startTime || !activity.endTime) {
       return false;
     }
 
@@ -54,14 +45,13 @@ export default function ExportButton({
 
       // Obtenir le premier jour de la semaine (lundi) pour chaque date
       const firstDayOfWeek1 = new Date(d1);
-      const day1 = d1.getDay() || 7; // getDay() retourne 0 pour dimanche, donc on utilise 7
+      const day1 = d1.getDay() || 7; // getDay() retourne 0 pour dimanche
       firstDayOfWeek1.setDate(d1.getDate() - day1 + 1);
 
       const firstDayOfWeek2 = new Date(d2);
       const day2 = d2.getDay() || 7;
       firstDayOfWeek2.setDate(d2.getDate() - day2 + 1);
 
-      // Comparer les dates au format YYYY-MM-DD
       return (
         firstDayOfWeek1.toISOString().split("T")[0] ===
         firstDayOfWeek2.toISOString().split("T")[0]
@@ -97,74 +87,279 @@ export default function ExportButton({
     const startDayIndex = days.indexOf(activity.day);
 
     if (startDayIndex >= 0 && startDayIndex < currentWeekDates.dates.length) {
-      // Supposer que l'activité est dans la semaine actuelle si le jour correspond
       return true;
     }
 
     return false;
   };
 
-  // Modifier la fonction exportToPDF pour un design plus attrayant
+  // Fonction pour obtenir une couleur de texte contrastée
+  const getContrastColor = (hexColor) => {
+    if (!hexColor || !hexColor.startsWith("#") || hexColor.length !== 7) {
+      return "#000000";
+    }
+
+    const r = parseInt(hexColor.substr(1, 2), 16);
+    const g = parseInt(hexColor.substr(3, 2), 16);
+    const b = parseInt(hexColor.substr(5, 2), 16);
+
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return luminance > 0.5 ? "#000000" : "#FFFFFF";
+  };
+
+  // Convertit un temps "HH:MM" en minutes depuis minuit
+  const timeToMinutes = (time) => {
+    if (time === "24:00") return 24 * 60;
+    const [hours, minutes] = time.split(":").map(Number);
+    return hours * 60 + minutes;
+  };
+
+  // Fonction pour dessiner une grille horaire pour un animateur
+  const drawAnimatorSchedule = (
+    pdf,
+    animator,
+    weekActivities,
+    weekDates,
+    startY,
+    breakPage = true
+  ) => {
+    const days = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"];
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const margin = 15;
+    const contentWidth = pageWidth - 2 * margin;
+
+    // Vérifier s'il reste assez d'espace sur la page
+    if (
+      breakPage &&
+      startY + 120 > pdf.internal.pageSize.getHeight() - margin
+    ) {
+      pdf.addPage();
+      startY = margin;
+    }
+
+    // Titre de la section
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(14);
+    pdf.setTextColor(0, 0, 0);
+    pdf.text(`Planning de ${animator.name}`, margin, startY);
+
+    startY += 10;
+
+    // Dimensions de la grille
+    const hourHeight = 8; // Hauteur d'une heure en mm
+    const dayWidth = contentWidth / 5; // Largeur d'un jour
+    const workingHours = [8, 20]; // Plage horaire 8h-20h
+    const gridHeight = (workingHours[1] - workingHours[0]) * hourHeight;
+
+    // En-têtes des jours
+    pdf.setFillColor(240, 240, 240);
+    pdf.setDrawColor(200, 200, 200);
+    pdf.rect(margin, startY, contentWidth, 8, "FD");
+
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(9);
+    pdf.setTextColor(0, 0, 0);
+
+    for (let i = 0; i < days.length; i++) {
+      pdf.text(
+        `${days[i]} ${weekDates[i] || ""}`,
+        margin + i * dayWidth + dayWidth / 2,
+        startY + 5,
+        { align: "center" }
+      );
+
+      // Lignes verticales
+      pdf.setDrawColor(220, 220, 220);
+      pdf.line(
+        margin + (i + 1) * dayWidth,
+        startY,
+        margin + (i + 1) * dayWidth,
+        startY + gridHeight + 8
+      );
+    }
+
+    startY += 8;
+
+    // Lignes horizontales des heures
+    pdf.setDrawColor(220, 220, 220);
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(7);
+
+    for (let hour = workingHours[0]; hour <= workingHours[1]; hour++) {
+      const y = startY + (hour - workingHours[0]) * hourHeight;
+
+      // Ligne horizontale
+      pdf.line(margin, y, margin + contentWidth, y);
+
+      // Heure
+      pdf.text(`${hour}:00`, margin - 5, y, { align: "right" });
+    }
+
+    // Dessiner le contour de la grille
+    pdf.setDrawColor(150, 150, 150);
+    pdf.rect(margin, startY, contentWidth, gridHeight, "D");
+
+    // Filtrer les activités pour cet animateur
+    const animatorActivities = weekActivities.filter(
+      (activity) =>
+        activity.animators &&
+        Array.isArray(activity.animators) &&
+        activity.animators.includes(animator.id)
+    );
+
+    // Dessiner les activités
+    for (const activity of animatorActivities) {
+      const startDayIndex = days.indexOf(activity.day);
+      const endDayIndex = days.indexOf(activity.endDay || activity.day);
+
+      if (startDayIndex === -1) continue;
+
+      // Pour chaque jour de l'activité
+      for (
+        let dayIndex = startDayIndex;
+        dayIndex <= (endDayIndex !== -1 ? endDayIndex : startDayIndex);
+        dayIndex++
+      ) {
+        // Déterminer l'heure de début et de fin pour ce jour
+        let startTimeStr = activity.startTime;
+        let endTimeStr = activity.endTime;
+
+        if (activity.multiDay) {
+          if (dayIndex > startDayIndex) {
+            startTimeStr = "00:00";
+          }
+          if (dayIndex < endDayIndex) {
+            endTimeStr = "24:00";
+          }
+        }
+
+        // Convertir en minutes
+        let startMinutes = timeToMinutes(startTimeStr);
+        let endMinutes = timeToMinutes(endTimeStr);
+
+        // Ajuster aux heures de travail affichées
+        const workStartMinutes = workingHours[0] * 60;
+        const workEndMinutes = workingHours[1] * 60;
+
+        // Si l'activité est en dehors des heures affichées, l'ajuster ou la sauter
+        if (endMinutes <= workStartMinutes || startMinutes >= workEndMinutes) {
+          continue;
+        }
+
+        startMinutes = Math.max(startMinutes, workStartMinutes);
+        endMinutes = Math.min(endMinutes, workEndMinutes);
+
+        // Calculer la position et la taille
+        const x = margin + dayIndex * dayWidth;
+        const y =
+          startY + ((startMinutes - workStartMinutes) / 60) * hourHeight;
+        const width = dayWidth;
+        const height = ((endMinutes - startMinutes) / 60) * hourHeight;
+
+        // Dessiner l'activité
+        const activityColor = activity.color || "#e0e0e0";
+        pdf.setFillColor(
+          parseInt(activityColor.substr(1, 2), 16),
+          parseInt(activityColor.substr(3, 2), 16),
+          parseInt(activityColor.substr(5, 2), 16)
+        );
+        pdf.roundedRect(x, y, width, height, 1, 1, "F");
+
+        // Texte de l'activité
+        const textColor = getContrastColor(activityColor);
+        pdf.setTextColor(
+          textColor === "#FFFFFF" ? 255 : 0,
+          textColor === "#FFFFFF" ? 255 : 0,
+          textColor === "#FFFFFF" ? 255 : 0
+        );
+
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(7);
+
+        // Ajuster le texte à la taille du bloc
+        const activityTitle = activity.title;
+        const timeText = `${startTimeStr}-${endTimeStr}`;
+
+        // Position verticale du texte
+        const textY = y + 3;
+
+        if (height >= 8) {
+          pdf.text(activityTitle, x + 2, textY);
+          if (height >= 12) {
+            pdf.setFont("helvetica", "normal");
+            pdf.setFontSize(6);
+            pdf.text(timeText, x + 2, textY + 4);
+          }
+        } else if (height >= 5) {
+          // Si l'espace est limité, afficher uniquement le titre
+          pdf.setFontSize(6);
+          pdf.text(activityTitle, x + 2, textY);
+        }
+      }
+    }
+
+    return startY + gridHeight + 10; // Retourner la nouvelle position Y
+  };
+
+  // Nouvelle méthode d'export PDF avec planning général et par animateur
   const exportToPDF = async () => {
-    // Filtrer les activités de la semaine actuelle et s'assurer qu'elles sont valides
+    // Filtrer les activités de la semaine actuelle
     const currentWeekActivities = activities
       .filter((activity) => activity && typeof activity === "object")
       .filter(isActivityInCurrentWeek);
 
-    // Si aucune activité pour cette semaine, afficher un message et ne pas créer de PDF
     if (!currentWeekActivities.length) {
       alert("Aucune activité n'est prévue pour cette semaine.");
       return;
     }
 
-    // Créer un élément temporaire pour le rendu du PDF
-    const tempDiv = document.createElement("div");
-    tempDiv.className = "pdf-export";
-    tempDiv.style.position = "absolute";
-    tempDiv.style.left = "-9999px";
-    tempDiv.style.top = "-9999px";
-    tempDiv.style.width = "1100px"; // Largeur suffisante pour le design
-    document.body.appendChild(tempDiv);
-
     // Obtenir les dates formatées pour l'affichage
     const weekDates = currentWeekDates.dates
-      .slice(0, 7) // Limiter aux 7 jours de la semaine
+      .slice(0, 5) // Limiter aux jours de la semaine (lundi-vendredi)
       .map(
         (date) =>
           date &&
           date.toLocaleDateString("fr-FR", { day: "numeric", month: "short" })
       );
 
-    // Fonction pour obtenir la couleur de texte contrastée par rapport à la couleur de fond
-    const getContrastColor = (hexColor) => {
-      // Si pas de couleur ou format invalide, retourner du noir
-      if (!hexColor || !hexColor.startsWith("#") || hexColor.length !== 7) {
-        return "#000000";
-      }
+    // Initialiser le PDF au format A4
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
 
-      // Convertir couleur hex en RGB
-      const r = parseInt(hexColor.substr(1, 2), 16);
-      const g = parseInt(hexColor.substr(3, 2), 16);
-      const b = parseInt(hexColor.substr(5, 2), 16);
+    // Dimensions de la page A4 en mm
+    const pageWidth = 210;
+    const pageHeight = 297;
+    const margin = 15;
+    const contentWidth = pageWidth - 2 * margin;
 
-      // Calculer la luminosité
-      const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    // ------- PREMIÈRE PARTIE: PLANNING GÉNÉRAL -------
 
-      // Si luminosité > 0.5, utiliser du texte noir, sinon blanc
-      return luminance > 0.5 ? "#000000" : "#FFFFFF";
-    };
+    // Paramètres de style
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(18);
+    pdf.setTextColor(0, 0, 0);
+    pdf.text("Planning des Animations", pageWidth / 2, 20, { align: "center" });
 
-    // Grouper les activités par jour pour le design par jour
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(12);
+    pdf.text(
+      `Semaine du ${weekDates[0]} au ${weekDates[4]}`,
+      pageWidth / 2,
+      30,
+      { align: "center" }
+    );
+
+    // Dessiner une ligne horizontale
+    pdf.setDrawColor(100, 100, 100);
+    pdf.setLineWidth(0.5);
+    pdf.line(margin, 35, pageWidth - margin, 35);
+
+    // Grouper les activités par jour
+    const days = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"];
     const activitiesByDay = {};
-    const days = [
-      "Lundi",
-      "Mardi",
-      "Mercredi",
-      "Jeudi",
-      "Vendredi",
-      "Samedi",
-      "Dimanche",
-    ];
 
     days.forEach((day) => {
       activitiesByDay[day] = currentWeekActivities
@@ -179,198 +374,201 @@ export default function ExportButton({
         .sort((a, b) => a.startTime.localeCompare(b.startTime));
     });
 
-    // Générer le contenu HTML pour le PDF avec un design plus moderne
-    tempDiv.innerHTML = `
-    <div class="pdf-content" ref=${contentRef} style="font-family: Arial, sans-serif; padding: 20px; max-width: 1000px;">
-      <style>
-        .pdf-header {
-          text-align: center;
-          margin-bottom: 20px;
-          border-bottom: 2px solid #333;
-          padding-bottom: 10px;
-        }
-        .pdf-header h1 {
-          font-size: 24px;
-          margin-bottom: 5px;
-        }
-        .week-info {
-          font-size: 16px;
-          color: #666;
-        }
-        .day-card {
-          margin-bottom: 20px;
-          border-radius: 8px;
-          overflow: hidden;
-          box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .day-header {
-          background-color: #f0f0f0;
-          padding: 10px 15px;
-          font-size: 18px;
-          font-weight: bold;
-          display: flex;
-          justify-content: space-between;
-        }
-        .day-date {
-          font-weight: normal;
-          color: #666;
-        }
-        .day-activities {
-          padding: 0;
-        }
-        .activity-item {
-          padding: 15px;
-          margin: 10px;
-          border-radius: 5px;
-          position: relative;
-        }
-        .activity-time {
-          font-weight: bold;
-          margin-bottom: 5px;
-        }
-        .activity-title {
-          font-size: 16px;
-          margin-bottom: 5px;
-        }
-        .activity-animators {
-          font-style: italic;
-          font-size: 14px;
-        }
-        .no-activities {
-          padding: 15px;
-          color: #999;
-          font-style: italic;
-        }
-        .page-break {
-          page-break-after: always;
-          height: 0;
-        }
-      </style>
-      
-      <div class="pdf-header">
-        <h1>Planning des Animations</h1>
-        <p class="week-info">Semaine du ${weekDates[0]} au ${weekDates[4]}</p>
-      </div>
-      
-      ${days
-        .slice(0, 5)
-        .map((day, dayIndex) => {
-          const dayActivities = activitiesByDay[day] || [];
-          return `
-          <div class="day-card">
-            <div class="day-header">
-              <span>${day}</span>
-              <span class="day-date">${weekDates[dayIndex] || ""}</span>
-            </div>
-            <div class="day-activities">
-              ${
-                dayActivities.length
-                  ? dayActivities
-                      .map((activity) => {
-                        // Déterminer l'heure de début et de fin pour ce jour spécifique
-                        let displayStartTime = activity.startTime;
-                        let displayEndTime = activity.endTime;
+    // Position Y courante pour le contenu
+    let yPos = 45;
+    const dayHeaderHeight = 10;
+    const activityHeight = 25;
+    const daySpacing = 5;
 
-                        if (activity.multiDay) {
-                          if (day !== activity.day) {
-                            displayStartTime = "00:00";
-                          }
-                          if (day !== (activity.endDay || activity.day)) {
-                            displayEndTime = "24:00";
-                          }
-                        }
+    // Pour chaque jour de la semaine
+    for (let i = 0; i < days.length; i++) {
+      const day = days[i];
+      const dayActivities = activitiesByDay[day] || [];
 
-                        const textColor = getContrastColor(
-                          activity.color || "#e0e0e0"
-                        );
-
-                        return `
-                  <div class="activity-item" style="background-color: ${
-                    activity.color || "#e0e0e0"
-                  }; color: ${textColor};">
-                    <div class="activity-time">${displayStartTime} - ${displayEndTime}</div>
-                    <div class="activity-title">${activity.title}</div>
-                    <div class="activity-animators">Animateurs: ${getAnimatorNames(
-                      activity.animators
-                    )}</div>
-                    ${
-                      activity.description
-                        ? `<div class="activity-description">${activity.description}</div>`
-                        : ""
-                    }
-                  </div>
-                `;
-                      })
-                      .join("")
-                  : `<div class="no-activities">Aucune activité prévue</div>`
-              }
-            </div>
-          </div>
-          ${
-            dayIndex < 4 && dayIndex % 2 === 1
-              ? '<div class="page-break"></div>'
-              : ""
-          }
-        `;
-        })
-        .join("")}
-    </div>
-  `;
-
-    try {
-      // Capturer le contenu en tant qu'image
-      const canvas = await html2canvas(tempDiv.querySelector(".pdf-content"), {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        onclone: (clonedDoc) => {
-          // S'assurer que les styles sont correctement appliqués au clone
-          const clonedContent = clonedDoc.querySelector(".pdf-content");
-          if (clonedContent) {
-            clonedContent.style.width = "1000px";
-          }
-        },
-      });
-
-      // Créer le PDF
-      const imgData = canvas.toDataURL("image/png");
-      const pageWidth = 210; // A4 width in mm
-      const pageHeight = 297; // A4 height in mm
-      const imgWidth = pageWidth - 20; // Full width with margins
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      // Créer un nouveau document PDF
-      const pdf = new jsPDF({
-        orientation: imgHeight > pageHeight ? "landscape" : "portrait",
-        unit: "mm",
-        format: "a4",
-      });
-
-      // Si l'image est plus haute qu'une page, la diviser en plusieurs pages
-      let heightLeft = imgHeight;
-      let position = 10; // Position Y initiale
-      let pageCanvas = canvas;
-
-      // Ajouter la première page
-      pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight - 20;
-
-      // Ajouter des pages supplémentaires si nécessaire
-      while (heightLeft > 0) {
-        position = -(pageHeight - 20 - heightLeft);
+      // Vérifier s'il reste suffisamment d'espace sur la page actuelle
+      const requiredHeight =
+        dayHeaderHeight + dayActivities.length * activityHeight + daySpacing;
+      if (yPos + requiredHeight > pageHeight - margin) {
         pdf.addPage();
-        pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight - 20;
+        yPos = margin;
       }
 
-      pdf.save("planning-animations.pdf");
-    } catch (error) {
-      console.error("Erreur lors de l'export PDF:", error);
-      alert("Une erreur est survenue lors de l'export PDF: " + error.message);
-    } finally {
-      // Nettoyer
-      document.body.removeChild(tempDiv);
+      // Entête du jour
+      pdf.setFillColor(240, 240, 240);
+      pdf.rect(margin, yPos, contentWidth, dayHeaderHeight, "F");
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(12);
+      pdf.setTextColor(0, 0, 0);
+      pdf.text(`${day} - ${weekDates[i] || ""}`, margin + 5, yPos + 7);
+
+      yPos += dayHeaderHeight;
+
+      // Si aucune activité, afficher un message
+      if (dayActivities.length === 0) {
+        pdf.setFont("helvetica", "italic");
+        pdf.setFontSize(10);
+        pdf.setTextColor(150, 150, 150);
+        pdf.text("Aucune activité prévue", margin + 5, yPos + 10);
+        yPos += activityHeight;
+      } else {
+        // Pour chaque activité du jour
+        for (let j = 0; j < dayActivities.length; j++) {
+          const activity = dayActivities[j];
+
+          // Vérifier s'il faut ajouter une nouvelle page
+          if (yPos + activityHeight > pageHeight - margin) {
+            pdf.addPage();
+            yPos = margin;
+          }
+
+          // Fond de l'activité
+          const activityColor = activity.color || "#e0e0e0";
+          pdf.setFillColor(
+            parseInt(activityColor.substr(1, 2), 16),
+            parseInt(activityColor.substr(3, 2), 16),
+            parseInt(activityColor.substr(5, 2), 16)
+          );
+          pdf.roundedRect(
+            margin,
+            yPos,
+            contentWidth,
+            activityHeight,
+            3,
+            3,
+            "F"
+          );
+
+          // Déterminer l'heure de début et de fin pour ce jour
+          let displayStartTime = activity.startTime;
+          let displayEndTime = activity.endTime;
+
+          if (activity.multiDay) {
+            if (day !== activity.day) {
+              displayStartTime = "00:00";
+            }
+            if (day !== (activity.endDay || activity.day)) {
+              displayEndTime = "24:00";
+            }
+          }
+
+          // Texte de l'activité
+          const textColor = getContrastColor(activityColor);
+          pdf.setTextColor(
+            textColor === "#FFFFFF" ? 255 : 0,
+            textColor === "#FFFFFF" ? 255 : 0,
+            textColor === "#FFFFFF" ? 255 : 0
+          );
+
+          pdf.setFont("helvetica", "bold");
+          pdf.setFontSize(10);
+          pdf.text(
+            `${displayStartTime} - ${displayEndTime}: ${activity.title}`,
+            margin + 5,
+            yPos + 7
+          );
+
+          pdf.setFont("helvetica", "normal");
+          pdf.setFontSize(9);
+          pdf.text(
+            `Animateurs: ${getAnimatorNames(activity.animators)}`,
+            margin + 5,
+            yPos + 15
+          );
+
+          if (activity.description) {
+            const maxLength = 60;
+            let description = activity.description;
+            if (description.length > maxLength) {
+              description = description.substring(0, maxLength) + "...";
+            }
+            pdf.setFontSize(8);
+            pdf.text(description, margin + 5, yPos + 22);
+          }
+
+          yPos += activityHeight + 2;
+        }
+      }
+
+      yPos += daySpacing;
     }
+
+    // ------- DEUXIÈME PARTIE: PLANNING PAR ANIMATEUR -------
+
+    // Filtrer les animateurs qui ont des activités cette semaine
+    const activeAnimators = animators.filter((animator) =>
+      currentWeekActivities.some(
+        (activity) =>
+          activity.animators &&
+          Array.isArray(activity.animators) &&
+          activity.animators.includes(animator.id)
+      )
+    );
+
+    if (activeAnimators.length > 0) {
+      // Ajouter une page pour les plannings des animateurs
+      pdf.addPage();
+
+      // Titre de section pour les plannings individuels
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(18);
+      pdf.setTextColor(0, 0, 0);
+      pdf.text("Plannings par Animateur", pageWidth / 2, 20, {
+        align: "center",
+      });
+
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(12);
+      pdf.text(
+        `Semaine du ${weekDates[0]} au ${weekDates[4]}`,
+        pageWidth / 2,
+        30,
+        { align: "center" }
+      );
+
+      pdf.setDrawColor(100, 100, 100);
+      pdf.setLineWidth(0.5);
+      pdf.line(margin, 35, pageWidth - margin, 35);
+
+      // Position de départ pour le premier planning d'animateur
+      let currentY = 45;
+
+      // Dessiner le planning de chaque animateur
+      for (const animator of activeAnimators) {
+        currentY = drawAnimatorSchedule(
+          pdf,
+          animator,
+          currentWeekActivities,
+          weekDates,
+          currentY
+        );
+      }
+    }
+
+    // Ajouter footer avec date d'impression sur toutes les pages
+    const totalPages = pdf.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      pdf.setPage(i);
+      pdf.setFont("helvetica", "italic");
+      pdf.setFontSize(8);
+      pdf.setTextColor(100, 100, 100);
+
+      const now = new Date();
+      const dateStr =
+        now.toLocaleDateString("fr-FR") +
+        " " +
+        now.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+
+      pdf.text(
+        `Imprimé le ${dateStr} - Page ${i}/${totalPages}`,
+        pageWidth - margin,
+        pageHeight - 10,
+        {
+          align: "right",
+        }
+      );
+    }
+
+    pdf.save("planning-animations.pdf");
   };
 
   return (
