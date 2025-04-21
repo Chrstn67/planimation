@@ -1,0 +1,325 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+
+  & .modal {
+    background-color: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    animation: modalFadeIn 0.3s ease;
+
+    & .modal-header {
+      padding: 15px 20px;
+      border-bottom: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      background-color: white;
+      z-index: 1;
+
+      & h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        color: #333;
+      }
+
+      & .close-button {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #666;
+
+        &:hover {
+          color: #00d2ff;
+        }
+      }
+    }
+
+    & form {
+      padding: 20px;
+
+      & .form-group {
+        margin-bottom: 15px;
+
+        & label {
+          display: block;
+          margin-bottom: 5px;
+          font-weight: 500;
+          color: #555;
+        }
+
+        & input,
+        & select,
+        & textarea {
+          width: 100%;
+          padding: 10px;
+          border: 1px solid #ddd;
+          border-radius: 6px;
+          font-size: 1rem;
+
+          &:focus {
+            outline: none;
+            border-color: #3a7bd5;
+            box-shadow: 0 0 0 2px rgba(58, 123, 213, 0.2);
+          }
+
+          &:disabled {
+            background-color: #f5f5f5;
+            cursor: not-allowed;
+          }
+        }
+
+        & select[multiple] {
+          height: 120px;
+        }
+      }
+
+      & .checkbox-group {
+        display: flex;
+        align-items: center;
+
+        & label {
+          display: flex;
+          align-items: center;
+          cursor: pointer;
+          margin-bottom: 0;
+        }
+
+        & input[type="checkbox"] {
+          width: auto;
+          margin-right: 8px;
+        }
+      }
+
+      & .form-row {
+        display: flex;
+        gap: 15px;
+
+        & .form-group {
+          flex: 1;
+        }
+      }
+
+      & .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 20px;
+
+        & button {
+          padding: 10px 20px;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: 500;
+          transition: all 0.2s ease;
+
+          &:first-child {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            color: #333;
+
+            &:hover {
+              background-color: #e0e0e0;
+            }
+          }
+
+          &:last-child {
+            background-color: #3a7bd5;
+            border: none;
+            color: white;
+
+            &:hover {
+              background-color: #00d2ff;
+            }
+          }
+        }
+      }
+    }
+
+    & .animators-list {
+      list-style: none;
+      margin: 0;
+      padding: 0 20px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+
+      & .animator-item {
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        padding: 15px 20px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+
+        & > div:first-child {
+          font-size: 1.1rem;
+          color: #333;
+        }
+
+        & .animator-actions {
+          display: flex;
+          gap: 10px;
+          flex-wrap: wrap;
+
+          & button {
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+
+            &:first-child {
+              background-color: #e0f0ff;
+              border: 1px solid #aad4ff;
+              color: #0066cc;
+
+              &:hover {
+                background-color: #cce6ff;
+              }
+            }
+
+            &:last-child {
+              background-color: #fff0f0;
+              border: 1px solid #ffcccc;
+              color: #cc0000;
+
+              &:hover {
+                background-color: #ffe6e6;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    &.details-modal {
+      & .modal-header {
+        color: white;
+      }
+
+      & .modal-content {
+        padding: 20px;
+
+        & .detail-item {
+          margin-bottom: 15px;
+
+          & strong {
+            display: inline-block;
+            width: 100px;
+            color: #555;
+          }
+
+          &.description {
+            & strong {
+              display: block;
+              margin-bottom: 5px;
+            }
+
+            & p {
+              margin: 0;
+              padding: 10px;
+              background-color: #f9f9f9;
+              border-radius: 6px;
+              border-left: 3px solid #3a7bd5;
+            }
+          }
+        }
+      }
+
+      & .modal-actions {
+        padding: 0 20px 20px;
+        display: flex;
+        justify-content: space-between;
+
+        & button {
+          padding: 10px 20px;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: 500;
+          transition: all 0.2s ease;
+
+          &.delete-button {
+            background-color: #fff0f0;
+            border: 1px solid #ffcccc;
+            color: #ff3333;
+
+            &:hover {
+              background-color: #ffcccc;
+            }
+          }
+
+          &.edit-button {
+            background-color: #3a7bd5;
+            border: none;
+            color: white;
+
+            &:hover {
+              background-color: #00d2ff;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .modal-overlay {
+    & .modal {
+      width: 95%;
+
+      & form {
+        & .form-row {
+          flex-direction: column;
+          gap: 10px;
+        }
+      }
+
+      & .animators-list {
+        padding: 0 15px 15px;
+
+        & .animator-item {
+          padding: 12px 15px;
+
+          & .animator-actions {
+            flex-direction: column;
+            align-items: stretch;
+
+            & button {
+              width: 100%;
+            }
+          }
+        }
+      }
+    }
+  }
+}
