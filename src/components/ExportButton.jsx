@@ -322,6 +322,18 @@ export default function ExportButton({
           date.toLocaleDateString("fr-FR", { day: "numeric", month: "short" })
       );
 
+    // Obtenir les dates de début et de fin de la semaine pour le nom du fichier
+    const startDate = currentWeekDates.dates[0].toLocaleDateString("fr-FR", {
+      day: "numeric",
+      month: "numeric",
+      year: "numeric",
+    });
+    const endDate = currentWeekDates.dates[4].toLocaleDateString("fr-FR", {
+      day: "numeric",
+      month: "numeric",
+      year: "numeric",
+    });
+
     // Initialiser le PDF au format A4
     const pdf = new jsPDF({
       orientation: "portrait",
@@ -568,7 +580,8 @@ export default function ExportButton({
       );
     }
 
-    pdf.save("planning-animations.pdf");
+    // Enregistrer le PDF avec le nom incluant les dates de la semaine
+    pdf.save(`planning-animations-${startDate}-${endDate}.pdf`);
   };
 
   return (

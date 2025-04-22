@@ -141,7 +141,7 @@ export default function DataSyncManager({
         // Afficher un message approprié
         const message = importedData.isPartial
           ? "Données de la semaine importées avec succès!"
-          : "Toutes les données importées avec succès!";
+          : "Données ont été importées avec succès!";
 
         setSuccess(message);
         setTimeout(() => setSuccess(""), 3000);
