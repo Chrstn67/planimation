@@ -78,3 +78,17 @@ body {
 * {
   box-sizing: border-box;
 }
+
+.sync-button {
+  background-color: #4a90e2;
+  color: white;
+}
+
+.sync-button:hover {
+  background-color: #3a80d2;
+}
+
+.sync-modal {
+  max-width: 650px;
+  width: 90%;
+}

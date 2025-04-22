@@ -7,6 +7,7 @@ import AnimatorModal from "../components/AnimatorModal";
 import ActivityDetailsModal from "../components/ActivityDetailsModal";
 import AnimatorsListModal from "../components/AnimatorsListModal";
 import ExportButton from "../components/ExportButton";
+import SyncModal from "../components/SyncModal";
 import "../styles/page.css";
 
 export default function Home() {
@@ -18,6 +19,7 @@ export default function Home() {
   const [selectedActivity, setSelectedActivity] = useState(null);
   const [selectedAnimator, setSelectedAnimator] = useState(null);
   const [showAnimatorsListModal, setShowAnimatorsListModal] = useState(false);
+  const [showSyncModal, setShowSyncModal] = useState(false);
   const [currentWeekDates, setCurrentWeekDates] = useState({
     startDate: new Date(),
     dates: [],
@@ -158,6 +160,21 @@ export default function Home() {
     setCurrentWeekDates(weekData);
   };
 
+  // Nouvelle fonction pour gérer l'importation des données
+  const handleDataImport = (importedActivities, importedAnimators) => {
+    // Vérifier et nettoyer les données importées
+    const cleanedActivities = cleanInvalidData(importedActivities);
+    const cleanedAnimators = cleanInvalidData(importedAnimators);
+
+    // Mettre à jour l'état avec les données importées
+    setActivities(cleanedActivities);
+    setAnimators(cleanedAnimators);
+
+    // Sauvegarder dans localStorage
+    localStorage.setItem("activities", JSON.stringify(cleanedActivities));
+    localStorage.setItem("animators", JSON.stringify(cleanedAnimators));
+  };
+
   return (
     <main className="container">
       <header>
@@ -177,6 +194,12 @@ export default function Home() {
             animators={animators}
             currentWeekDates={currentWeekDates}
           />
+          <button
+            onClick={() => setShowSyncModal(true)}
+            className="sync-button"
+          >
+            Synchroniser
+          </button>
           {activities.length > 0 && (
             <button
               onClick={handleClearAllActivities}
@@ -237,6 +260,15 @@ export default function Home() {
           onClose={() => setShowDetailsModal(false)}
           onEdit={handleEditActivity}
           onDelete={handleDeleteActivity}
+        />
+      )}
+
+      {showSyncModal && (
+        <SyncModal
+          activities={activities}
+          animators={animators}
+          onClose={() => setShowSyncModal(false)}
+          onDataImport={handleDataImport}
         />
       )}
     </main>
