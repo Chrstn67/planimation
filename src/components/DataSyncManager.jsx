@@ -8,6 +8,7 @@ import "../styles/data-sync.css";
 export default function DataSyncManager({
   activities,
   animators,
+  description,
   onDataImport,
   currentWeekDates,
 }) {
@@ -42,6 +43,7 @@ export default function DataSyncManager({
         dataToExport = {
           activities: weekActivities,
           animators,
+          description,
           timestamp: new Date().toISOString(),
           version: "1.0",
           isPartial: true,
@@ -63,6 +65,7 @@ export default function DataSyncManager({
         dataToExport = {
           activities,
           animators,
+          description,
           timestamp: new Date().toISOString(),
           version: "1.0",
           isPartial: false,
@@ -135,8 +138,12 @@ export default function DataSyncManager({
           );
         }
 
-        // Importer les données
-        onDataImport(importedData.activities, importedData.animators);
+        // Importer les données (activités, animateurs et description)
+        onDataImport(
+          importedData.activities,
+          importedData.animators,
+          importedData.description
+        );
 
         // Afficher un message approprié
         const message = importedData.isPartial
@@ -161,6 +168,31 @@ export default function DataSyncManager({
       <div className="sync-methods">
         <h2>Synchroniser vos données</h2>
         <p>Exportez vos données pour les transférer vers un autre appareil</p>
+
+        <div className="sync-mode-selector">
+          <div className="sync-mode-option">
+            <input
+              type="radio"
+              id="all-data"
+              name="sync-mode"
+              value="all"
+              checked={syncMode === "all"}
+              onChange={() => setSyncMode("all")}
+            />
+            <label htmlFor="all-data">Données complètes</label>
+          </div>
+          <div className="sync-mode-option">
+            <input
+              type="radio"
+              id="week-data"
+              name="sync-mode"
+              value="week"
+              checked={syncMode === "week"}
+              onChange={() => setSyncMode("week")}
+            />
+            <label htmlFor="week-data">Semaine actuelle uniquement</label>
+          </div>
+        </div>
 
         <div className="sync-actions">
           <button onClick={exportToFile} className="action-button">
@@ -193,7 +225,10 @@ export default function DataSyncManager({
                   Cliquez sur <strong>Exporter les données</strong> pour
                   télécharger un fichier <code>.json</code>
                 </li>
-                <li>Ce fichier contient toutes vos activités et animateurs</li>
+                <li>
+                  Ce fichier contient toutes vos activités, animateurs et
+                  descriptions
+                </li>
               </ul>
             </li>
             <li>
