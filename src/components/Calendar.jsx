@@ -5,6 +5,30 @@ import "../styles/calendar.css";
 import React from "react";
 import ActivityModal from "./ActivityModal";
 
+// Nouveau composant pour la modale de description
+const DescriptionModal = ({ description, title, onClose }) => {
+  return (
+    <div className="description-modal-overlay" onClick={onClose}>
+      <div className="description-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="description-modal-header">
+          <h3>{title}</h3>
+          <button className="close-button" onClick={onClose}>
+            ×
+          </button>
+        </div>
+        <div className="description-modal-content">
+          {description.split("\n").map((line, index) => (
+            <React.Fragment key={index}>
+              {line}
+              <br />
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const days = [
   "Lundi",
   "Mardi",
@@ -32,11 +56,25 @@ export default function Calendar({
     date: null,
   });
 
+  // Nouvel état pour la modale de description
+  const [showDescriptionModal, setShowDescriptionModal] = useState(false);
+  const [selectedDescription, setSelectedDescription] = useState({
+    text: "",
+    title: "",
+  });
+
   // État pour les dates de la semaine
   const [weekDates, setWeekDates] = useState({
     startDate: new Date(),
     dates: [],
   });
+
+  // Fonction pour gérer l'affichage de la modale de description
+  const handleShowDescription = (e, description, title) => {
+    e.stopPropagation();
+    setSelectedDescription({ text: description, title: title });
+    setShowDescriptionModal(true);
+  };
 
   // Fonction pour générer des créneaux sur 24h
   const getAllTimeSlots = () => {
@@ -499,10 +537,21 @@ export default function Calendar({
                               <p className="animators">
                                 {getAnimatorNames(activity.animators)}
                               </p>
-                              <p className="description">
-                                <span>Description :</span> <br />{" "}
-                                {activity.description}
-                              </p>
+                              {/* Remplacer l'affichage de la description par un bouton "Voir plus" */}
+                              <div className="description-button">
+                                <button
+                                  onClick={(e) =>
+                                    handleShowDescription(
+                                      e,
+                                      activity.description,
+                                      activity.title
+                                    )
+                                  }
+                                  className="view-more-btn"
+                                >
+                                  Voir description
+                                </button>
+                              </div>
                             </>
                           )}
                         </div>
@@ -525,6 +574,15 @@ export default function Calendar({
           initialDay={newActivityInitialData.day}
           initialTime={newActivityInitialData.time}
           initialDate={newActivityInitialData.date} // Passer la date au modal
+        />
+      )}
+
+      {/* Nouvelle modale pour afficher la description complète */}
+      {showDescriptionModal && (
+        <DescriptionModal
+          description={selectedDescription.text}
+          title={selectedDescription.title}
+          onClose={() => setShowDescriptionModal(false)}
         />
       )}
     </div>
