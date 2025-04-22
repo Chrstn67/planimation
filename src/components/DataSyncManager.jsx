@@ -169,31 +169,6 @@ export default function DataSyncManager({
         <h2>Synchroniser vos données</h2>
         <p>Exportez vos données pour les transférer vers un autre appareil</p>
 
-        <div className="sync-mode-selector">
-          <div className="sync-mode-option">
-            <input
-              type="radio"
-              id="all-data"
-              name="sync-mode"
-              value="all"
-              checked={syncMode === "all"}
-              onChange={() => setSyncMode("all")}
-            />
-            <label htmlFor="all-data">Données complètes</label>
-          </div>
-          <div className="sync-mode-option">
-            <input
-              type="radio"
-              id="week-data"
-              name="sync-mode"
-              value="week"
-              checked={syncMode === "week"}
-              onChange={() => setSyncMode("week")}
-            />
-            <label htmlFor="week-data">Semaine actuelle uniquement</label>
-          </div>
-        </div>
-
         <div className="sync-actions">
           <button onClick={exportToFile} className="action-button">
             Exporter les données
