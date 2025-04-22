@@ -177,6 +177,14 @@
             font-style: italic;
             opacity: 0.8;
           }
+
+          & .description {
+            font-weight: bold;
+            opacity: 0.8;
+            & span {
+              font-weight: normal;
+            }
+          }
         }
       }
     }

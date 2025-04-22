@@ -18,6 +18,7 @@ const days = [
 export default function Calendar({
   activities,
   animators,
+  description,
   onActivityClick,
   onAddActivity,
   onWeekChange, // Nouvelle prop pour partager les dates avec le parent
@@ -497,6 +498,10 @@ export default function Calendar({
                               </p>
                               <p className="animators">
                                 {getAnimatorNames(activity.animators)}
+                              </p>
+                              <p className="description">
+                                <span>Description :</span> <br />{" "}
+                                {activity.description}
                               </p>
                             </>
                           )}
