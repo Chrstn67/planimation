@@ -8,6 +8,7 @@ import ActivityDetailsModal from "../components/ActivityDetailsModal";
 import AnimatorsListModal from "../components/AnimatorsListModal";
 import ExportButton from "../components/ExportButton";
 import SyncModal from "../components/SyncModal";
+import { FaPlus, FaEye, FaSyncAlt, FaTrashAlt } from "react-icons/fa"; // Import des icônes
 import "../styles/page.css";
 
 export default function Home() {
@@ -180,14 +181,23 @@ export default function Home() {
       <header>
         <h1>Calendrier des Animations</h1>
         <div className="actions">
-          <button onClick={() => setShowActivityModal(true)}>
-            Ajouter une activité
+          <button
+            onClick={() => setShowActivityModal(true)}
+            className="add-button"
+          >
+            <FaPlus /> Ajouter une activité
           </button>
-          <button onClick={() => setShowAnimatorModal(true)}>
-            Ajouter un animateur
+          <button
+            onClick={() => setShowAnimatorModal(true)}
+            className="add-button"
+          >
+            <FaPlus /> Ajouter un animateur
           </button>
-          <button onClick={() => setShowAnimatorsListModal(true)}>
-            Voir les animateurs
+          <button
+            onClick={() => setShowAnimatorsListModal(true)}
+            className="view-button"
+          >
+            <FaEye /> Voir les animateurs
           </button>
           <ExportButton
             activities={activities}
@@ -198,15 +208,11 @@ export default function Home() {
             onClick={() => setShowSyncModal(true)}
             className="sync-button"
           >
-            Synchroniser
+            <FaSyncAlt /> Synchroniser
           </button>
           {activities.length > 0 && (
-            <button
-              onClick={handleClearAllActivities}
-              className="clear-button"
-              style={{ backgroundColor: "#ff4d4d" }}
-            >
-              Supprimer toutes les activités
+            <button onClick={handleClearAllActivities} className="clear-button">
+              <FaTrashAlt /> Supprimer toutes les activités
             </button>
           )}
         </div>

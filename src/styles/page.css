@@ -39,12 +39,45 @@
   font-weight: 600;
   transition: all 0.3s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.container header .actions button:hover {
-  background-color: #00d2ff;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+.container header .actions button svg {
+  font-size: 1.2rem;
+}
+
+.container header .actions button.add-button {
+  background-color: #4caf50;
+}
+
+.container header .actions button.add-button:hover {
+  background-color: #45a049;
+}
+
+.container header .actions button.view-button {
+  background-color: #ff9800;
+}
+
+.container header .actions button.view-button:hover {
+  background-color: #e68900;
+}
+
+.container header .actions button.sync-button {
+  background-color: #4a90e2;
+}
+
+.container header .actions button.sync-button:hover {
+  background-color: #3a80d2;
+}
+
+.container header .actions button.clear-button {
+  background-color: #ff4d4d;
+}
+
+.container header .actions button.clear-button:hover {
+  background-color: #ff1a1a;
 }
 
 @media (max-width: 768px) {
@@ -77,18 +110,4 @@ body {
 
 * {
   box-sizing: border-box;
-}
-
-.sync-button {
-  background-color: #4a90e2;
-  color: white;
-}
-
-.sync-button:hover {
-  background-color: #3a80d2;
-}
-
-.sync-modal {
-  max-width: 650px;
-  width: 90%;
 }
