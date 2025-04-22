@@ -216,6 +216,20 @@ export default function ActivityModal({
                   </option>
                 ))}
             </select>
+            <p
+              style={{
+                fontSize: "12px",
+                margin: "15px 0",
+                padding: "10px",
+                borderRadius: "4px",
+                textAlign: "center",
+                backgroundColor: "#f5f5f5",
+                border: "1px solid #e0e0e0",
+              }}
+            >
+              Pour sélectionner plusieurs animateurs sur PC :<br />
+              <em>Ctrl (Cmd) + Clic</em>
+            </p>
           </div>
 
           <div className="form-group">

@@ -1,0 +1,74 @@
+/* Footer.css */
+
+.site-footer {
+  margin-top: 1em;
+
+  color: #ecf0f1;
+  padding: 20px;
+  text-align: center;
+  font-family: "Arial", sans-serif;
+
+  .Logos {
+    margin: 20px 0;
+
+    .footer-logo {
+      max-width: 100px;
+      border-radius: 50%;
+    }
+  }
+
+  .copyright {
+    font-size: 0.9em;
+    margin-top: 10px;
+  }
+
+  a {
+    color: #3498db;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .modal {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+    width: 90%;
+    padding: 20px;
+    background-color: #ffffff;
+    color: #333;
+
+    &::backdrop {
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+      h2 {
+        font-size: 1.5em;
+        margin-bottom: 10px;
+      }
+
+      .legal-content {
+        font-size: 0.9em;
+        line-height: 1.6;
+        margin-bottom: 20px;
+      }
+
+      .btn-secondary {
+        background-color: #3498db;
+        color: #ffffff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+
+        &:hover {
+          background-color: #2980b9;
+        }
+      }
+    }
+  }
+}

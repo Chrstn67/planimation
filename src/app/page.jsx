@@ -8,6 +8,8 @@ import ActivityDetailsModal from "../components/ActivityDetailsModal";
 import AnimatorsListModal from "../components/AnimatorsListModal";
 import ExportButton from "../components/ExportButton";
 import SyncModal from "../components/SyncModal";
+import Footer from "../components/Footer";
+
 import { FaPlus, FaEye, FaSyncAlt, FaTrashAlt } from "react-icons/fa"; // Import des icônes
 import "../styles/page.css";
 
@@ -277,6 +279,9 @@ export default function Home() {
           onDataImport={handleDataImport}
         />
       )}
+      <footer>
+        <Footer />
+      </footer>
     </main>
   );
 }
