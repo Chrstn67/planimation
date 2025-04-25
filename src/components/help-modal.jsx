@@ -351,26 +351,6 @@ export default function HelpModal({ onClose }) {
                 </ul>
               </div>
             </div>
-
-            <div className="help-section">
-              <div className="help-section-header">
-                <Clock className="help-icon" />
-                <h3>Fonctionnalités à venir</h3>
-              </div>
-              <div className="help-section-content">
-                <p>Prochainement disponibles :</p>
-                <ul>
-                  <li>
-                    <Moon /> Mode sombre
-                  </li>
-                  <li>Modèles d'activités</li>
-                  <li>Vue par animateur</li>
-                  <li>Glisser-déposer entre semaines</li>
-                  <li>Filtres avancés</li>
-                  <li>Tutoriel interactif</li>
-                </ul>
-              </div>
-            </div>
           </div>
 
           <div className="help-footer">
