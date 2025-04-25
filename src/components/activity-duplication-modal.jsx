@@ -45,7 +45,7 @@ export default function ActivityDuplicationModal({
     const startDate = new Date(today);
     startDate.setDate(today.getDate() + daysToMonday - 7); // Commencer par le lundi de la semaine actuelle
 
-    // Générer 4 semaines
+    // Générer 52 semaines
     for (let week = 0; week < 52; week++) {
       const weekStart = new Date(startDate);
       weekStart.setDate(startDate.getDate() + week * 7);
@@ -86,6 +86,7 @@ export default function ActivityDuplicationModal({
     });
   };
 
+  // Modifier la fonction handleDateChange pour prendre en compte correctement le jour sélectionné
   const handleDateChange = (e) => {
     const [weekIndex, dayIndex] = e.target.value.split("-").map(Number);
     if (weekIndex >= 0 && dayIndex >= 0) {
@@ -262,7 +263,7 @@ export default function ActivityDuplicationModal({
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="date">Semaine de l'activité</label>
+                    <label htmlFor="date">Date de l'activité</label>
                     <select
                       id="date"
                       name="date"
@@ -270,11 +271,22 @@ export default function ActivityDuplicationModal({
                       required
                       className="date-select"
                     >
-                      <option value="">Sélectionnez une semaine</option>
+                      <option value="">Sélectionnez une date</option>
                       {availableDates.map((week, weekIndex) => (
-                        <option key={weekIndex} value={`${weekIndex}-0`}>
-                          {week.label}
-                        </option>
+                        <optgroup key={weekIndex} label={week.label}>
+                          {week.dates.map((date, dayIndex) => (
+                            <option
+                              key={dayIndex}
+                              value={`${weekIndex}-${dayIndex}`}
+                            >
+                              {days[dayIndex]}{" "}
+                              {date.toLocaleDateString("fr-FR", {
+                                day: "numeric",
+                                month: "short",
+                              })}
+                            </option>
+                          ))}
+                        </optgroup>
                       ))}
                     </select>
                   </div>

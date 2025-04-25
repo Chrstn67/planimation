@@ -228,13 +228,24 @@ export default function Home() {
     const cleanedActivities = cleanInvalidData(importedActivities);
     const cleanedAnimators = cleanInvalidData(importedAnimators);
 
+    // Préserver les propriétés supplémentaires des activités (materials, objectives, etc.)
+    const enrichedActivities = cleanedActivities.map((activity) => {
+      return {
+        ...activity,
+        materials: activity.materials || "",
+        objectives: activity.objectives || "",
+        preparation: activity.preparation || "",
+        evaluation: activity.evaluation || "",
+      };
+    });
+
     // Mettre à jour l'état avec les données importées
-    setActivities(cleanedActivities);
-    setFilteredActivities(cleanedActivities);
+    setActivities(enrichedActivities);
+    setFilteredActivities(enrichedActivities);
     setAnimators(cleanedAnimators);
 
     // Sauvegarder dans localStorage
-    localStorage.setItem("activities", JSON.stringify(cleanedActivities));
+    localStorage.setItem("activities", JSON.stringify(enrichedActivities));
     localStorage.setItem("animators", JSON.stringify(cleanedAnimators));
   };
 

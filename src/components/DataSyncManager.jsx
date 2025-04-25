@@ -157,7 +157,7 @@ export default function DataSyncManager({
         // Afficher un message approprié
         const message = importedData.isPartial
           ? "Données de la semaine importées avec succès!"
-          : "Données ont été importées avec succès!";
+          : "Données importées avec succès!";
 
         setSuccess(message);
         setTimeout(() => setSuccess(""), 3000);
@@ -177,32 +177,6 @@ export default function DataSyncManager({
       <div className="sync-methods">
         <h2>Synchroniser vos données</h2>
         <p>Exportez vos données pour les transférer vers un autre appareil</p>
-
-        <div className="sync-mode">
-          <label className="mode-label">Mode d'exportation:</label>
-          <div className="mode-options">
-            <label>
-              <input
-                type="radio"
-                name="syncMode"
-                value="all"
-                checked={syncMode === "all"}
-                onChange={() => setSyncMode("all")}
-              />
-              Toutes les données
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="syncMode"
-                value="week"
-                checked={syncMode === "week"}
-                onChange={() => setSyncMode("week")}
-              />
-              Semaine actuelle
-            </label>
-          </div>
-        </div>
 
         <div className="sync-actions">
           <button onClick={exportToFile} className="action-button">

@@ -14,9 +14,25 @@ export default function AnimationSheetModal({ activity, animators, onClose }) {
     evaluation: activity.evaluation || "",
   });
 
+  // Modifier la fonction pour sauvegarder les modifications
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+
+    // Sauvegarder les modifications dans l'activité originale
+    const updatedActivity = {
+      ...activity,
+      [name]: value,
+    };
+
+    // Mettre à jour l'activité dans le localStorage pour la persistance
+    const savedActivities = JSON.parse(
+      localStorage.getItem("activities") || "[]"
+    );
+    const updatedActivities = savedActivities.map((act) =>
+      act.id === activity.id ? { ...act, [name]: value } : act
+    );
+    localStorage.setItem("activities", JSON.stringify(updatedActivities));
   };
 
   const getAnimatorNames = (animatorIds) => {
@@ -248,6 +264,29 @@ export default function AnimationSheetModal({ activity, animators, onClose }) {
     );
   };
 
+  // Ajouter cette fonction pour sauvegarder toutes les modifications à la fermeture
+  const handleClose = () => {
+    // Sauvegarder toutes les modifications avant de fermer
+    const savedActivities = JSON.parse(
+      localStorage.getItem("activities") || "[]"
+    );
+    const updatedActivities = savedActivities.map((act) =>
+      act.id === activity.id
+        ? {
+            ...act,
+            materials: formData.materials,
+            objectives: formData.objectives,
+            description: formData.description,
+            preparation: formData.preparation,
+            evaluation: formData.evaluation,
+          }
+        : act
+    );
+    localStorage.setItem("activities", JSON.stringify(updatedActivities));
+
+    onClose();
+  };
+
   return (
     <div className="modal-overlay">
       <div className="modal animation-sheet-modal">
@@ -256,7 +295,7 @@ export default function AnimationSheetModal({ activity, animators, onClose }) {
           style={{ backgroundColor: activity.color || "#e0e0e0" }}
         >
           <h2>Fiche d'animation</h2>
-          <button className="close-button" onClick={onClose}>
+          <button className="close-button" onClick={handleClose}>
             ×
           </button>
         </div>
@@ -356,9 +395,6 @@ export default function AnimationSheetModal({ activity, animators, onClose }) {
           </div>
 
           <div className="modal-actions">
-            <button className="cancel-button" onClick={onClose}>
-              Fermer
-            </button>
             <button className="export-button" onClick={exportToPDF}>
               Exporter en PDF
             </button>

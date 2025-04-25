@@ -422,6 +422,7 @@ export default function DragDropCalendar({
       .padStart(2, "0")}`;
   };
 
+  // Modifier la fonction handleDrop pour corriger le problème de changement de jour
   const handleDrop = (e, day, time) => {
     e.preventDefault();
 
@@ -479,7 +480,8 @@ export default function DragDropCalendar({
     // Mettre à jour la date complète
     const dayIndex = days.indexOf(day);
     if (weekDates.dates[dayIndex]) {
-      updatedActivity.fullDate = new Date(weekDates.dates[dayIndex]);
+      // Créer une nouvelle date pour éviter les problèmes de référence
+      updatedActivity.fullDate = new Date(weekDates.dates[dayIndex].getTime());
 
       // Recalculer les dates pour une activité multi-jours
       if (updatedActivity.multiDay) {
