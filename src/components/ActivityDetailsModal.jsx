@@ -76,7 +76,7 @@ export default function ActivityDetailsModal({
               {/* Nouveaux boutons pour les fiches et la duplication */}
               <div className="detail-actions">
                 <button className="sheet-button" onClick={onCreateSheet}>
-                  <FaFileAlt /> Créer une fiche d'animation
+                  <FaFileAlt /> Créer/Modifier une fiche d'animation
                 </button>
                 <button className="duplicate-button" onClick={onDuplicate}>
                   <FaCopy /> Dupliquer cette activité

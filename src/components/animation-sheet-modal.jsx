@@ -1,38 +1,68 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { jsPDF } from "jspdf";
 import "../styles/modal.css";
 import "../styles/animation-sheet.css";
+import "../styles/export-button.css";
 
 export default function AnimationSheetModal({ activity, animators, onClose }) {
-  const [formData, setFormData] = useState({
-    ...activity,
-    materials: activity.materials || "",
-    objectives: activity.objectives || "",
-    preparation: activity.preparation || "",
-    evaluation: activity.evaluation || "",
-  });
+  // Récupérer les données les plus récentes du localStorage lors de l'initialisation
+  const getUpdatedActivityData = () => {
+    const savedActivities = JSON.parse(
+      localStorage.getItem("activities") || "[]"
+    );
+    const currentActivity =
+      savedActivities.find((act) => act.id === activity.id) || activity;
+
+    return {
+      ...currentActivity,
+      materials: currentActivity.materials || "",
+      objectives: currentActivity.objectives || "",
+      preparation: currentActivity.preparation || "",
+      evaluation: currentActivity.evaluation || "",
+      description: currentActivity.description || "",
+      deroulement: currentActivity.deroulement || "",
+    };
+  };
+
+  // Initialiser avec les données à jour du localStorage
+  const [formData, setFormData] = useState(getUpdatedActivityData());
+
+  // Mettre à jour l'état du formulaire si l'activité change
+  useEffect(() => {
+    setFormData(getUpdatedActivityData());
+  }, [activity.id]);
 
   // Modifier la fonction pour sauvegarder les modifications
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
 
-    // Sauvegarder les modifications dans l'activité originale
-    const updatedActivity = {
-      ...activity,
-      [name]: value,
-    };
-
-    // Mettre à jour l'activité dans le localStorage pour la persistance
+    // Sauvegarder les modifications dans le localStorage pour la persistance
     const savedActivities = JSON.parse(
       localStorage.getItem("activities") || "[]"
     );
-    const updatedActivities = savedActivities.map((act) =>
-      act.id === activity.id ? { ...act, [name]: value } : act
+
+    const activityIndex = savedActivities.findIndex(
+      (act) => act.id === activity.id
     );
-    localStorage.setItem("activities", JSON.stringify(updatedActivities));
+
+    if (activityIndex !== -1) {
+      // Mettre à jour l'activité existante
+      savedActivities[activityIndex] = {
+        ...savedActivities[activityIndex],
+        [name]: value,
+      };
+    } else {
+      // Ajouter l'activité si elle n'existe pas
+      savedActivities.push({
+        ...activity,
+        [name]: value,
+      });
+    }
+
+    localStorage.setItem("activities", JSON.stringify(savedActivities));
   };
 
   const getAnimatorNames = (animatorIds) => {
@@ -170,20 +200,40 @@ export default function AnimationSheetModal({ activity, animators, onClose }) {
 
     // Sections de la fiche
     const sections = [
-      { title: "Matériel nécessaire", content: formData.materials, icon: "📋" },
+      { title: "Description", content: formData.description, icon: "💡" },
       { title: "Objectifs", content: formData.objectives, icon: "🎯" },
-      { title: "Description", content: formData.description, icon: "📝" },
+      { title: "Matériel nécessaire", content: formData.materials, icon: "📋" },
+      { title: "Déroulement", content: formData.deroulement, icon: "📝" },
       { title: "Préparation", content: formData.preparation, icon: "⚙️" },
       { title: "Évaluation", content: formData.evaluation, icon: "📊" },
     ];
 
     yPos += rowHeight * tableData.length + 15;
 
+    // Fonction pour calculer la hauteur estimée d'une section
+    const calculateSectionHeight = (sectionContent) => {
+      if (!sectionContent || sectionContent.trim() === "") {
+        return 30; // Hauteur minimale pour une section vide
+      }
+
+      const textLines = doc.splitTextToSize(sectionContent, contentWidth - 5);
+      return textLines.length * 5.5 + 30; // 30 = hauteur du titre + marges
+    };
+
     sections.forEach((section) => {
+      // Calculer la hauteur estimée de la section
+      const sectionHeight = calculateSectionHeight(section.content);
+
+      // Vérifier si la section entière tiendra sur la page actuelle
+      // Si elle ne tient pas, passer à une nouvelle page pour la section complète
+      if (yPos + sectionHeight > pageHeight - margin) {
+        doc.addPage();
+        yPos = margin + 10;
+      }
+
       // Titre de section avec style amélioré
       doc.setFont("helvetica", "bold");
       doc.setFontSize(14);
-      doc.setTextColor(activityColor.r, activityColor.g, activityColor.b);
 
       // Barre colorée pour le titre de section
       doc.setFillColor(activityColor.r, activityColor.g, activityColor.b);
@@ -212,12 +262,6 @@ export default function AnimationSheetModal({ activity, animators, onClose }) {
           contentWidth - 5
         );
 
-        // Vérifier s'il faut passer à une nouvelle page
-        if (yPos + textLines.length * 5.5 > pageHeight - margin) {
-          doc.addPage();
-          yPos = margin + 10;
-        }
-
         // Ajouter un fond léger pour le contenu
         const contentHeight = textLines.length * 5.5 + 10;
         doc.setFillColor(248, 248, 252);
@@ -234,12 +278,6 @@ export default function AnimationSheetModal({ activity, animators, onClose }) {
         // Ajouter le texte
         doc.text(textLines, margin + 5, yPos);
         yPos += textLines.length * 5.5 + 15;
-      }
-
-      // Vérifier si la prochaine section nécessiterait une nouvelle page
-      if (yPos + 30 > pageHeight - margin) {
-        doc.addPage();
-        yPos = margin + 10;
       }
     });
 
@@ -264,26 +302,10 @@ export default function AnimationSheetModal({ activity, animators, onClose }) {
     );
   };
 
-  // Ajouter cette fonction pour sauvegarder toutes les modifications à la fermeture
+  // Fonction pour sauvegarder toutes les modifications à la fermeture
   const handleClose = () => {
-    // Sauvegarder toutes les modifications avant de fermer
-    const savedActivities = JSON.parse(
-      localStorage.getItem("activities") || "[]"
-    );
-    const updatedActivities = savedActivities.map((act) =>
-      act.id === activity.id
-        ? {
-            ...act,
-            materials: formData.materials,
-            objectives: formData.objectives,
-            description: formData.description,
-            preparation: formData.preparation,
-            evaluation: formData.evaluation,
-          }
-        : act
-    );
-    localStorage.setItem("activities", JSON.stringify(updatedActivities));
-
+    // Pas besoin de sauvegarder à nouveau ici car les modifications
+    // sont déjà sauvegardées à chaque changement grâce à handleChange
     onClose();
   };
 
@@ -333,6 +355,18 @@ export default function AnimationSheetModal({ activity, animators, onClose }) {
 
             <form className="animation-sheet-form">
               <div className="form-group">
+                <label htmlFor="description">Description</label>
+                <textarea
+                  id="description"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  rows="5"
+                  placeholder="Décrivez le déroulement de l'activité..."
+                />
+              </div>
+
+              <div className="form-group">
                 <label htmlFor="materials">Matériel nécessaire</label>
                 <textarea
                   id="materials"
@@ -357,11 +391,11 @@ export default function AnimationSheetModal({ activity, animators, onClose }) {
               </div>
 
               <div className="form-group">
-                <label htmlFor="description">Description</label>
+                <label htmlFor="deroulement">Déroulement</label>
                 <textarea
-                  id="description"
-                  name="description"
-                  value={formData.description}
+                  id="deroulement"
+                  name="deroulement"
+                  value={formData.deroulement}
                   onChange={handleChange}
                   rows="5"
                   placeholder="Décrivez le déroulement de l'activité..."
