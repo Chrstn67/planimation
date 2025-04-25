@@ -3,6 +3,7 @@
 import { useState } from "react";
 import ActivityModal from "./ActivityModal";
 import "../styles/modal.css";
+import { FaFileAlt, FaCopy } from "react-icons/fa";
 
 export default function ActivityDetailsModal({
   activity,
@@ -10,6 +11,8 @@ export default function ActivityDetailsModal({
   onClose,
   onEdit,
   onDelete,
+  onCreateSheet,
+  onDuplicate,
 }) {
   const [showEditModal, setShowEditModal] = useState(false);
 
@@ -68,6 +71,16 @@ export default function ActivityDetailsModal({
                 <p>
                   {activity.description || "Aucune description disponible."}
                 </p>
+              </div>
+
+              {/* Nouveaux boutons pour les fiches et la duplication */}
+              <div className="detail-actions">
+                <button className="sheet-button" onClick={onCreateSheet}>
+                  <FaFileAlt /> Créer une fiche d'animation
+                </button>
+                <button className="duplicate-button" onClick={onDuplicate}>
+                  <FaCopy /> Dupliquer cette activité
+                </button>
               </div>
             </div>
 

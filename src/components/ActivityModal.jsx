@@ -172,7 +172,7 @@ export default function ActivityModal({
                 value={formData.endDay}
                 onChange={handleChange}
                 required
-                disabled={!formData.multiDay}
+                // disabled={!formData.multiDay}
               >
                 <option value="Lundi">Lundi</option>
                 <option value="Mardi">Mardi</option>
@@ -205,7 +205,6 @@ export default function ActivityModal({
               multiple
               value={formData.animators}
               onChange={handleAnimatorChange}
-              required
             >
               {animators
                 .slice()

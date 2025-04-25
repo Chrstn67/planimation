@@ -1,0 +1,233 @@
+.help-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(3px);
+}
+
+.help-modal {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 900px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  animation: modalFadeIn 0.3s ease-out;
+  overflow: hidden;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.help-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid #eaeaea;
+  background: linear-gradient(135deg, #4a6fa5, #166088);
+  color: white;
+}
+
+.help-modal-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.help-modal-close {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.help-modal-close:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.help-modal-content {
+  padding: 0;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.help-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+}
+
+.help-section {
+  border: 1px solid #eaeaea;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: box-shadow 0.3s;
+}
+
+.help-section:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.help-section-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: #f8f9fa;
+  cursor: pointer;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.help-icon {
+  margin-right: 12px;
+  color: #4a6fa5;
+}
+
+.help-section-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.help-section-content {
+  padding: 16px;
+  background-color: white;
+}
+
+.help-section-content p {
+  margin-top: 0;
+  color: #555;
+}
+
+.help-section-content ul {
+  padding-left: 20px;
+  margin-bottom: 0;
+}
+
+.help-section-content li {
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.help-section-content li:last-child {
+  margin-bottom: 0;
+}
+
+.help-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #eaeaea;
+  text-align: center;
+  color: #666;
+  font-size: 0.9rem;
+  background-color: #f8f9fa;
+}
+
+.help-footer p {
+  margin: 5px 0;
+}
+
+/* Styles pour les sections colorées */
+.help-section:nth-child(1) .help-section-header {
+  background-color: rgba(74, 111, 165, 0.1);
+}
+
+.help-section:nth-child(2) .help-section-header {
+  background-color: rgba(22, 96, 136, 0.1);
+}
+
+.help-section:nth-child(3) .help-section-header {
+  background-color: rgba(92, 131, 116, 0.1);
+}
+
+.help-section:nth-child(4) .help-section-header {
+  background-color: rgba(155, 89, 182, 0.1);
+}
+
+.help-section:nth-child(5) .help-section-header {
+  background-color: rgba(52, 152, 219, 0.1);
+}
+
+.help-section:nth-child(6) .help-section-header {
+  background-color: rgba(231, 76, 60, 0.1);
+}
+
+.help-section:nth-child(7) .help-section-header {
+  background-color: rgba(241, 196, 15, 0.1);
+}
+
+.help-section:nth-child(8) .help-section-header {
+  background-color: rgba(230, 126, 34, 0.1);
+}
+
+.help-section:nth-child(9) .help-section-header {
+  background-color: rgba(149, 165, 166, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .help-modal {
+    width: 95%;
+    max-height: 95vh;
+  }
+
+  .help-modal-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .help-section-header h3 {
+    font-size: 1rem;
+  }
+
+  .help-section-content {
+    padding: 12px;
+  }
+
+  .help-section-content li {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .help-modal-header {
+    padding: 12px 16px;
+  }
+
+  .help-tabs {
+    padding: 10px;
+  }
+
+  .help-section-header {
+    padding: 10px 12px;
+  }
+
+  .help-icon {
+    margin-right: 8px;
+  }
+
+  .help-footer {
+    padding: 12px;
+  }
+}

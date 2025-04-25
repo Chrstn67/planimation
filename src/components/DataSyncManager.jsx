@@ -61,9 +61,18 @@ export default function DataSyncManager({
           },
         };
       } else {
-        // Exporter toutes les données
+        // Exporter toutes les données incluant les propriétés supplémentaires
+        // des activités comme materials, objectives, preparation, evaluation
+        const enrichedActivities = activities.map((activity) => ({
+          ...activity,
+          materials: activity.materials || "",
+          objectives: activity.objectives || "",
+          preparation: activity.preparation || "",
+          evaluation: activity.evaluation || "",
+        }));
+
         dataToExport = {
-          activities,
+          activities: enrichedActivities,
           animators,
           description,
           timestamp: new Date().toISOString(),
@@ -168,6 +177,32 @@ export default function DataSyncManager({
       <div className="sync-methods">
         <h2>Synchroniser vos données</h2>
         <p>Exportez vos données pour les transférer vers un autre appareil</p>
+
+        <div className="sync-mode">
+          <label className="mode-label">Mode d'exportation:</label>
+          <div className="mode-options">
+            <label>
+              <input
+                type="radio"
+                name="syncMode"
+                value="all"
+                checked={syncMode === "all"}
+                onChange={() => setSyncMode("all")}
+              />
+              Toutes les données
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="syncMode"
+                value="week"
+                checked={syncMode === "week"}
+                onChange={() => setSyncMode("week")}
+              />
+              Semaine actuelle
+            </label>
+          </div>
+        </div>
 
         <div className="sync-actions">
           <button onClick={exportToFile} className="action-button">

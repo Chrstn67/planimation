@@ -1,0 +1,85 @@
+.animation-sheet-modal {
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+}
+
+.animation-sheet-preview {
+  padding: 15px;
+  background-color: #fff;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.animation-sheet-header {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.animation-sheet-header h3 {
+  margin: 0 0 15px 0;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.animation-sheet-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 10px;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.info-label {
+  font-weight: bold;
+  min-width: 80px;
+  color: #555;
+}
+
+.info-value {
+  flex: 1;
+}
+
+.animation-sheet-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.animation-sheet-form .form-group {
+  margin-bottom: 15px;
+}
+
+.animation-sheet-form label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #555;
+}
+
+.animation-sheet-form textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 14px;
+  resize: vertical;
+}
+
+.animation-sheet-form textarea:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+@media (max-width: 768px) {
+  .animation-sheet-info {
+    grid-template-columns: 1fr;
+  }
+}
