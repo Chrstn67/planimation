@@ -422,7 +422,13 @@ export default function DragDropCalendar({
       .padStart(2, "0")}`;
   };
 
-  // Modifier la fonction handleDrop pour corriger le problème de changement de jour
+  // Fonction utilitaire pour convertir les heures en minutes
+  const timeToMinutes = (timeStr) => {
+    const [hours, minutes] = timeStr.split(":").map(Number);
+    return hours * 60 + minutes;
+  };
+
+  // Modifier la fonction handleDrop pour corriger le problème de mise à jour des dates
   const handleDrop = (e, day, time) => {
     e.preventDefault();
 
@@ -457,6 +463,9 @@ export default function DragDropCalendar({
         updatedActivity.endDay =
           newEndDayIndex < 0 ? days[0] : days[days.length - 1];
       }
+    } else if (!updatedActivity.multiDay) {
+      // Pour les activités d'un seul jour, s'assurer que endDay est le même que day
+      updatedActivity.endDay = day;
     }
 
     // Mettre à jour l'heure de début avec l'heure du créneau où l'activité a été déposée
@@ -470,27 +479,21 @@ export default function DragDropCalendar({
     if (endMinutes >= 24 * 60) {
       updatedActivity.endTime = "00:00";
     } else {
-      const hours = Math.floor(endMinutes / 60);
-      const mins = endMinutes % 60;
-      updatedActivity.endTime = `${hours.toString().padStart(2, "0")}:${mins
-        .toString()
-        .padStart(2, "0")}`;
+      updatedActivity.endTime = minutesToTimeFormat(endMinutes);
     }
 
-    // Mettre à jour la date complète
-    const dayIndex = days.indexOf(day);
-    if (weekDates.dates[dayIndex]) {
-      // Créer une nouvelle date pour éviter les problèmes de référence
-      updatedActivity.fullDate = new Date(weekDates.dates[dayIndex].getTime());
+    // Mettre à jour la date complète pour le nouveau jour de début
+    const newDayStartIdx = days.indexOf(day);
+    if (weekDates.dates[newDayStartIdx]) {
+      // Créer une nouvelle date pour la date de début
+      updatedActivity.fullDate = new Date(weekDates.dates[newDayStartIdx]);
 
-      // Recalculer les dates pour une activité multi-jours
-      if (updatedActivity.multiDay) {
-        updatedActivity.dates = calculateActivityDates(
-          updatedActivity.fullDate,
-          updatedActivity.day,
-          updatedActivity.endDay
-        );
-      }
+      // Recalculer toutes les dates pour l'activité
+      updatedActivity.dates = calculateActivityDates(
+        updatedActivity.fullDate,
+        updatedActivity.day,
+        updatedActivity.endDay
+      );
     }
 
     // Appeler la fonction de mise à jour
@@ -508,12 +511,6 @@ export default function DragDropCalendar({
 
   // Filtrer les jours à afficher en fonction de la vue
   const daysToShow = currentView === "week" ? days : [selectedDay];
-
-  // Ajouter cette fonction utilitaire pour convertir les heures en minutes
-  const timeToMinutes = (timeStr) => {
-    const [hours, minutes] = timeStr.split(":").map(Number);
-    return hours * 60 + minutes;
-  };
 
   return (
     <div className="calendar-container">
