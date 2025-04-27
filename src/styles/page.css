@@ -51,7 +51,8 @@
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.container header .actions {
+/* Styles pour les boutons d'action */
+.desktop-actions {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
@@ -59,10 +60,8 @@
   align-items: center;
 }
 
-.container header .actions button {
+.desktop-actions button {
   padding: 10px 15px;
-  background-color: #3a7bd5;
-  color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -74,48 +73,63 @@
   gap: 8px;
 }
 
-.container header .actions button svg {
+.desktop-actions button svg {
   font-size: 1.2rem;
 }
 
-.container header .actions button.add-button {
+/* Couleurs des boutons */
+.add-button {
   background-color: #4caf50;
+  color: white;
 }
 
-.container header .actions button.add-button:hover {
+.add-button:hover {
   background-color: #45a049;
 }
 
-.container header .actions button.view-button {
+.view-button {
   background-color: #ff9800;
+  color: white;
 }
 
-.container header .actions button.view-button:hover {
+.view-button:hover {
   background-color: #e68900;
 }
 
-.container header .actions button.sync-button {
+.sync-button {
   background-color: #4a90e2;
+  color: white;
 }
 
-.container header .actions button.sync-button:hover {
+.sync-button:hover {
   background-color: #3a80d2;
 }
 
-.container header .actions button.clear-button {
+.clear-button {
   background-color: #ff4d4d;
+  color: white;
 }
 
-.container header .actions button.clear-button:hover {
+.clear-button:hover {
   background-color: #ff1a1a;
 }
 
-.container header .actions button.stats-button {
+.stats-button {
   background-color: #9c27b0;
+  color: white;
 }
 
-.container header .actions button.stats-button:hover {
+.stats-button:hover {
   background-color: #7b1fa2;
+}
+
+.export-button {
+  background-color: #ff9800;
+  color: white;
+}
+
+.export-button:hover {
+  background-color: #e68900;
 }
 
 @media (max-width: 768px) {
@@ -132,9 +146,9 @@
     font-size: 2rem;
   }
 
-  .container header .actions {
-    width: 100%;
-    justify-content: center;
+  /* Cette règle assure que la classe desktop-actions est bien masquée en mobile */
+  .desktop-actions {
+    display: none !important;
   }
 }
 
@@ -249,5 +263,93 @@ body {
   .search-filter-container {
     align-items: center;
     max-width: 700px;
+  }
+}
+
+/* ===== STYLES POUR LE MENU MOBILE ===== */
+.mobile-menu-container {
+  display: none;
+  position: relative;
+  width: 100%;
+  margin-top: 15px;
+}
+
+.mobile-menu-toggle {
+  background-color: #4a90e2; /* Couleur de fond identique au bouton sync */
+  color: white; /* Couleur de texte identique */
+  border: none;
+  border-radius: 8px;
+  padding: 10px 15px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-menu-toggle.active {
+  background-color: #3a80d2; /* Couleur de survol identique au bouton sync */
+  border-radius: 8px 8px 0 0;
+}
+
+.mobile-menu-toggle svg {
+  font-size: 1.2rem;
+}
+
+.mobile-actions-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: #fff;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.mobile-actions-menu button {
+  padding: 12px 15px;
+  text-align: left;
+  border: none;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  color: white;
+}
+
+.mobile-actions-menu button:last-child {
+  border-bottom: none;
+}
+
+.mobile-actions-menu button svg {
+  font-size: 1rem;
+}
+
+/* Media queries pour alterner entre le menu desktop et mobile */
+@media (max-width: 768px) {
+  .desktop-actions {
+    display: none !important;
+  }
+
+  .mobile-menu-container {
+    display: block;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-menu-container {
+    display: none;
   }
 }

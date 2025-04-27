@@ -22,7 +22,9 @@ import {
   FaSyncAlt,
   FaTrashAlt,
   FaChartBar,
-} from "react-icons/fa"; // Import des icônes
+  FaBars,
+  FaTimes,
+} from "react-icons/fa";
 import "../styles/page.css";
 
 export default function Home() {
@@ -42,10 +44,13 @@ export default function Home() {
   });
   const [selectedAnimatorFilter, setSelectedAnimatorFilter] = useState(null);
 
-  // Nouveaux états pour les nouvelles modales
+  // Nouveaux états pour les modales
   const [showAnimationSheetModal, setShowAnimationSheetModal] = useState(false);
   const [showStatsDashboardModal, setShowStatsDashboardModal] = useState(false);
   const [showDuplicationModal, setShowDuplicationModal] = useState(false);
+
+  // État pour le menu mobile
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Fonction pour nettoyer les données invalides
   const cleanInvalidData = (dataArray) => {
@@ -176,6 +181,7 @@ export default function Home() {
       setActivities([]);
       setFilteredActivities([]);
       localStorage.removeItem("activities");
+      setMobileMenuOpen(false); // Fermer le menu mobile après action
     }
   };
 
@@ -258,17 +264,11 @@ export default function Home() {
     setActivities(updatedActivities);
   };
 
-  // Fonction pour ouvrir la modale de fiche d'animation
-  const handleOpenAnimationSheet = () => {
-    if (selectedActivity) {
-      setShowAnimationSheetModal(true);
-    }
-  };
-
-  // Fonction pour ouvrir la modale de duplication
-  const handleOpenDuplicationModal = () => {
-    if (selectedActivity) {
-      setShowDuplicationModal(true);
+  // Fonction pour fermer le menu mobile après une action
+  const handleMobileAction = (action) => {
+    setMobileMenuOpen(false);
+    if (action && typeof action === "function") {
+      action();
     }
   };
 
@@ -288,7 +288,9 @@ export default function Home() {
               onFilterChange={handleAnimatorFilterChange}
             />
           </div>
-          <div className="actions">
+
+          {/* Version desktop des boutons d'action */}
+          <div className="desktop-actions">
             <button
               onClick={() => setShowActivityModal(true)}
               className="add-button"
@@ -331,6 +333,79 @@ export default function Home() {
               >
                 <FaTrashAlt /> Supprimer toutes les activités
               </button>
+            )}
+          </div>
+
+          {/* Version mobile avec menu hamburger */}
+          <div className="mobile-menu-container">
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className={`mobile-menu-toggle ${mobileMenuOpen ? "active" : ""}`}
+            >
+              {mobileMenuOpen ? <FaTimes /> : <FaBars />} Actions
+            </button>
+
+            {mobileMenuOpen && (
+              <div className="mobile-actions-menu">
+                <button
+                  onClick={() =>
+                    handleMobileAction(() => setShowActivityModal(true))
+                  }
+                  className="add-button"
+                >
+                  <FaPlus /> Ajouter une activité
+                </button>
+                <button
+                  onClick={() =>
+                    handleMobileAction(() => setShowAnimatorModal(true))
+                  }
+                  className="add-button"
+                >
+                  <FaPlus /> Ajouter un animateur
+                </button>
+                <button
+                  onClick={() =>
+                    handleMobileAction(() => setShowAnimatorsListModal(true))
+                  }
+                  className="view-button"
+                >
+                  <FaEye /> Voir les animateurs
+                </button>
+                <button
+                  onClick={() =>
+                    handleMobileAction(() => setShowStatsDashboardModal(true))
+                  }
+                  className="stats-button"
+                >
+                  <FaChartBar /> Statistiques
+                </button>
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    // Note: ExportButton est un composant, on ne peut pas l'inclure directement ici
+                    // On utilise donc la même structure que la version desktop
+                  }}
+                  className="export-button"
+                >
+                  <FaEye /> Exporter
+                </button>
+                <button
+                  onClick={() =>
+                    handleMobileAction(() => setShowSyncModal(true))
+                  }
+                  className="sync-button"
+                >
+                  <FaSyncAlt /> Synchroniser
+                </button>
+                {activities.length > 0 && (
+                  <button
+                    onClick={() => handleMobileAction(handleClearAllActivities)}
+                    className="clear-button"
+                  >
+                    <FaTrashAlt /> Supprimer toutes les activités
+                  </button>
+                )}
+              </div>
             )}
           </div>
         </div>
