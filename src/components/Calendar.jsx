@@ -4,8 +4,13 @@ import { useState, useEffect } from "react";
 import "../styles/calendar.css";
 import React from "react";
 import ActivityModal from "./ActivityModal";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Calendar as CalendarIcon,
+} from "lucide-react";
 
-// Nouveau composant pour la modale de description
+// Composant pour la modale de description
 const DescriptionModal = ({ description, title, onClose }) => {
   return (
     <div className="description-modal-overlay" onClick={onClose}>
@@ -45,7 +50,7 @@ export default function Calendar({
   description,
   onActivityClick,
   onAddActivity,
-  onWeekChange, // Nouvelle prop pour partager les dates avec le parent
+  onWeekChange, // Prop pour partager les dates avec le parent
 }) {
   const [currentView, setCurrentView] = useState("week");
   const [selectedDay, setSelectedDay] = useState("Lundi");
@@ -56,7 +61,7 @@ export default function Calendar({
     date: null,
   });
 
-  // Nouvel état pour la modale de description
+  // État pour la modale de description
   const [showDescriptionModal, setShowDescriptionModal] = useState(false);
   const [selectedDescription, setSelectedDescription] = useState({
     text: "",
@@ -68,6 +73,9 @@ export default function Calendar({
     startDate: new Date(),
     dates: [],
   });
+
+  // État pour le sélecteur de date
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   // Fonction pour gérer l'affichage de la modale de description
   const handleShowDescription = (e, description, title) => {
@@ -276,7 +284,7 @@ export default function Calendar({
     }
   };
 
-  // Ajouter cette fonction pour vérifier si une activité est la première occurrence du jour
+  // Fonction pour vérifier si une activité est la première occurrence du jour
   const isFirstOccurrenceOfDay = (activity, day, startTime) => {
     const dayIndex = days.indexOf(day);
     const activityStartDayIndex = days.indexOf(activity.day);
@@ -300,7 +308,7 @@ export default function Calendar({
     return false;
   };
 
-  // Ajouter cette fonction pour vérifier si une activité doit être fusionnée avec la précédente
+  // Fonction pour vérifier si une activité doit être fusionnée avec la précédente
   const shouldMergeWithPrevious = (activity, day, startTime, prevStartTime) => {
     // Si ce n'est pas le premier créneau horaire de la journée
     if (startTime !== "00:00") {
@@ -317,7 +325,7 @@ export default function Calendar({
     return false;
   };
 
-  // Ajouter cette fonction pour initialiser les dates de la semaine
+  // Fonction pour initialiser les dates de la semaine
   const initWeekDates = (startDate = new Date()) => {
     const dates = [];
     const start = new Date(startDate);
@@ -346,14 +354,26 @@ export default function Calendar({
     }
   };
 
-  // Ajouter cette fonction pour changer de semaine
+  // Fonction pour changer de semaine
   const changeWeek = (direction) => {
     const newStartDate = new Date(weekDates.startDate);
     newStartDate.setDate(newStartDate.getDate() + direction * 7);
     initWeekDates(newStartDate);
   };
 
-  // Ajouter un useEffect pour initialiser les dates au chargement
+  // Fonction pour aller à aujourd'hui
+  const goToToday = () => {
+    initWeekDates(new Date());
+  };
+
+  // Fonction pour traiter la sélection d'une date dans le sélecteur de date
+  const handleDateSelection = (event) => {
+    const selectedDate = new Date(event.target.value);
+    initWeekDates(selectedDate);
+    setShowDatePicker(false);
+  };
+
+  // Initialiser les dates au chargement
   React.useEffect(() => {
     initWeekDates();
   }, []);
@@ -363,18 +383,61 @@ export default function Calendar({
 
   return (
     <div className="calendar-container">
-      {/* Remplacer la section calendar-header par celle-ci pour ajouter la navigation entre semaines */}
       <div className="calendar-header">
         <div className="week-navigation">
-          <button onClick={() => changeWeek(-1)}>Semaine précédente</button>
-          <span className="current-week">
-            {weekDates.dates.length > 0 &&
-              `${weekDates.dates[0].toLocaleDateString(
-                "fr-FR"
-              )} - ${weekDates.dates[4].toLocaleDateString("fr-FR")}`}
-          </span>
-          <button onClick={() => changeWeek(1)}>Semaine suivante</button>
+          <button
+            className="nav-button"
+            onClick={() => changeWeek(-1)}
+            aria-label="Semaine précédente"
+          >
+            <ChevronLeft size={18} />
+          </button>
+
+          <div className="week-selector">
+            <button className="today-button" onClick={goToToday}>
+              Aujourd'hui
+            </button>
+
+            <div className="date-picker-container">
+              <button
+                className="current-week-button"
+                onClick={() => setShowDatePicker(!showDatePicker)}
+              >
+                <span className="current-week">
+                  {weekDates.dates.length > 0 &&
+                    `${weekDates.dates[0].toLocaleDateString("fr-FR", {
+                      day: "numeric",
+                      month: "short",
+                    })} - ${weekDates.dates[4].toLocaleDateString("fr-FR", {
+                      day: "numeric",
+                      month: "short",
+                    })}`}
+                </span>
+                <CalendarIcon size={16} className="calendar-icon" />
+              </button>
+
+              {showDatePicker && (
+                <input
+                  type="date"
+                  className="date-picker"
+                  onChange={handleDateSelection}
+                  onClick={(e) => e.stopPropagation()}
+                  onBlur={() => setShowDatePicker(false)}
+                  autoFocus
+                />
+              )}
+            </div>
+          </div>
+
+          <button
+            className="nav-button"
+            onClick={() => changeWeek(1)}
+            aria-label="Semaine suivante"
+          >
+            <ChevronRight size={18} />
+          </button>
         </div>
+
         <div className="view-selector">
           <button
             className={currentView === "week" ? "active" : ""}
@@ -408,7 +471,6 @@ export default function Calendar({
 
         {daysToShow.map((day) => (
           <div key={day} className="day-column">
-            {/* Remplacer la section day-header dans la boucle daysToShow.map par celle-ci pour afficher les dates */}
             <div className="day-header">
               <div className="day-name">{day}</div>
               <div className="day-date">
@@ -429,7 +491,6 @@ export default function Calendar({
               );
 
               return (
-                /* Remplacer la section qui affiche les activités dans la boucle timeSlots.slice(0, -1).map par celle-ci */
                 <div
                   key={index}
                   className="time-slot"
@@ -537,7 +598,6 @@ export default function Calendar({
                               <p className="animators">
                                 {getAnimatorNames(activity.animators)}
                               </p>
-                              {/* Remplacer l'affichage de la description par un bouton "Voir plus" */}
                               <div className="description-button">
                                 <button
                                   onClick={(e) =>
@@ -573,11 +633,11 @@ export default function Calendar({
           animators={animators}
           initialDay={newActivityInitialData.day}
           initialTime={newActivityInitialData.time}
-          initialDate={newActivityInitialData.date} // Passer la date au modal
+          initialDate={newActivityInitialData.date}
         />
       )}
 
-      {/* Nouvelle modale pour afficher la description complète */}
+      {/* Modale pour afficher la description complète */}
       {showDescriptionModal && (
         <DescriptionModal
           description={selectedDescription.text}

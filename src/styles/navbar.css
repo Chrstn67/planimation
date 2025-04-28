@@ -1,0 +1,267 @@
+/* === NAVBAR RESPONSIVE AMÉLIORÉE === */
+
+/* Styles communs */
+.enhanced-navbar,
+.mobile-navbar {
+  margin-top: 15px;
+  position: relative;
+  z-index: 10;
+}
+
+/* ===== STYLES DESKTOP ===== */
+.enhanced-navbar {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+/* Styles pour les groupes de boutons */
+.navbar-group {
+  position: relative;
+}
+
+/* Style du bouton principal de chaque groupe */
+.group-button {
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  color: white;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 140px;
+  justify-content: center;
+}
+
+/* Effet au survol des boutons principaux */
+.group-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Icône de flèche pour indiquer le dropdown */
+.dropdown-arrow {
+  font-size: 0.8rem;
+  margin-left: auto;
+  transition: transform 0.3s ease;
+}
+
+.dropdown-arrow.open {
+  transform: rotate(180deg);
+}
+
+/* Style du dropdown */
+.group-dropdown {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  width: 140px;
+  z-index: 20;
+  overflow: hidden;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Style des actions dans le dropdown */
+.dropdown-action {
+  width: 100%;
+  text-align: left;
+  padding: 12px 16px;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+  color: #333;
+  transition: background-color 0.2s ease;
+}
+
+.dropdown-action:hover {
+  background-color: #f5f5f5;
+}
+
+/* Pour le composant ExportButton */
+.dropdown-component {
+  padding: 5px 10px;
+}
+
+.dropdown-component button {
+  width: 100%;
+  text-align: left;
+  padding: 7px 6px;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  color: #333 !important;
+  font-weight: normal;
+}
+
+.dropdown-component button:hover {
+  background-color: #f5f5f5 !important;
+}
+
+/* ===== STYLES MOBILE ===== */
+.mobile-navbar {
+  width: 100%;
+}
+
+.mobile-menu-toggle {
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.mobile-menu-toggle.active {
+  background-color: #3a80d2;
+  border-radius: 8px 8px 0 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.mobile-menu-toggle svg {
+  font-size: 1.2rem;
+}
+
+.mobile-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: #fff;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  overflow: hidden;
+  width: 100%;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.mobile-group {
+  margin-bottom: 1px;
+}
+
+.mobile-group:last-child {
+  margin-bottom: 0;
+}
+
+.mobile-group-header {
+  padding: 14px 16px;
+  font-weight: 600;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mobile-group-actions {
+  background-color: #f9f9f9;
+}
+
+.mobile-action {
+  width: 100%;
+  text-align: left;
+  padding: 12px 16px;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+  color: #333;
+  transition: background-color 0.2s ease;
+  border-bottom: 1px solid #eee;
+}
+
+.mobile-action:last-child {
+  border-bottom: none;
+}
+
+.mobile-action:hover {
+  background-color: #f0f0f0;
+}
+
+.mobile-action-wrapper {
+  padding: 8px 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.mobile-action-wrapper:last-child {
+  border-bottom: none;
+}
+
+.mobile-action-wrapper button {
+  width: 100%;
+  text-align: left;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  color: #333 !important;
+  padding: 4px 0 !important;
+  font-weight: normal;
+}
+
+/* ===== RESPONSIVE LAYOUT ===== */
+@media (min-width: 769px) {
+  .search-and-actions {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .search-filter-container {
+    flex: 1;
+    margin-right: 20px;
+  }
+}
+
+/* Pour empêcher que le menu flottant soit coupé */
+.container {
+  overflow: visible !important;
+}
+
+/* Des animations plus fluides */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.group-dropdown,
+.mobile-menu {
+  animation: slideDown 0.3s ease-out;
+}

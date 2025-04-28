@@ -15,16 +15,8 @@ import Footer from "../components/Footer";
 import AnimationSheetModal from "../components/animation-sheet-modal";
 import StatsDashboardModal from "../components/stats-dashboard-modal";
 import ActivityDuplicationModal from "../components/activity-duplication-modal";
+import EnhancedNavbar from "../components/EnhancedNavbar"; // Import du nouveau composant navbar
 
-import {
-  FaPlus,
-  FaEye,
-  FaSyncAlt,
-  FaTrashAlt,
-  FaChartBar,
-  FaBars,
-  FaTimes,
-} from "react-icons/fa";
 import "../styles/page.css";
 
 export default function Home() {
@@ -48,9 +40,6 @@ export default function Home() {
   const [showAnimationSheetModal, setShowAnimationSheetModal] = useState(false);
   const [showStatsDashboardModal, setShowStatsDashboardModal] = useState(false);
   const [showDuplicationModal, setShowDuplicationModal] = useState(false);
-
-  // État pour le menu mobile
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Fonction pour nettoyer les données invalides
   const cleanInvalidData = (dataArray) => {
@@ -181,7 +170,6 @@ export default function Home() {
       setActivities([]);
       setFilteredActivities([]);
       localStorage.removeItem("activities");
-      setMobileMenuOpen(false); // Fermer le menu mobile après action
     }
   };
 
@@ -264,14 +252,6 @@ export default function Home() {
     setActivities(updatedActivities);
   };
 
-  // Fonction pour fermer le menu mobile après une action
-  const handleMobileAction = (action) => {
-    setMobileMenuOpen(false);
-    if (action && typeof action === "function") {
-      action();
-    }
-  };
-
   return (
     <main className="container">
       <header>
@@ -289,125 +269,20 @@ export default function Home() {
             />
           </div>
 
-          {/* Version desktop des boutons d'action */}
-          <div className="desktop-actions">
-            <button
-              onClick={() => setShowActivityModal(true)}
-              className="add-button"
-            >
-              <FaPlus /> Ajouter une activité
-            </button>
-            <button
-              onClick={() => setShowAnimatorModal(true)}
-              className="add-button"
-            >
-              <FaPlus /> Ajouter un animateur
-            </button>
-            <button
-              onClick={() => setShowAnimatorsListModal(true)}
-              className="view-button"
-            >
-              <FaEye /> Voir les animateurs
-            </button>
-            <button
-              onClick={() => setShowStatsDashboardModal(true)}
-              className="stats-button"
-            >
-              <FaChartBar /> Statistiques
-            </button>
-            <ExportButton
-              activities={filteredActivities}
-              animators={animators}
-              currentWeekDates={currentWeekDates}
-            />
-            <button
-              onClick={() => setShowSyncModal(true)}
-              className="sync-button"
-            >
-              <FaSyncAlt /> Synchroniser
-            </button>
-            {activities.length > 0 && (
-              <button
-                onClick={handleClearAllActivities}
-                className="clear-button"
-              >
-                <FaTrashAlt /> Supprimer toutes les activités
-              </button>
-            )}
-          </div>
-
-          {/* Version mobile avec menu hamburger */}
-          <div className="mobile-menu-container">
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className={`mobile-menu-toggle ${mobileMenuOpen ? "active" : ""}`}
-            >
-              {mobileMenuOpen ? <FaTimes /> : <FaBars />} Actions
-            </button>
-
-            {mobileMenuOpen && (
-              <div className="mobile-actions-menu">
-                <button
-                  onClick={() =>
-                    handleMobileAction(() => setShowActivityModal(true))
-                  }
-                  className="add-button"
-                >
-                  <FaPlus /> Ajouter une activité
-                </button>
-                <button
-                  onClick={() =>
-                    handleMobileAction(() => setShowAnimatorModal(true))
-                  }
-                  className="add-button"
-                >
-                  <FaPlus /> Ajouter un animateur
-                </button>
-                <button
-                  onClick={() =>
-                    handleMobileAction(() => setShowAnimatorsListModal(true))
-                  }
-                  className="view-button"
-                >
-                  <FaEye /> Voir les animateurs
-                </button>
-                <button
-                  onClick={() =>
-                    handleMobileAction(() => setShowStatsDashboardModal(true))
-                  }
-                  className="stats-button"
-                >
-                  <FaChartBar /> Statistiques
-                </button>
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    // Note: ExportButton est un composant, on ne peut pas l'inclure directement ici
-                    // On utilise donc la même structure que la version desktop
-                  }}
-                  className="export-button"
-                >
-                  <FaEye /> Exporter
-                </button>
-                <button
-                  onClick={() =>
-                    handleMobileAction(() => setShowSyncModal(true))
-                  }
-                  className="sync-button"
-                >
-                  <FaSyncAlt /> Synchroniser
-                </button>
-                {activities.length > 0 && (
-                  <button
-                    onClick={() => handleMobileAction(handleClearAllActivities)}
-                    className="clear-button"
-                  >
-                    <FaTrashAlt /> Supprimer toutes les activités
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
+          {/* Nouvelle navbar responsive intégrant à la fois la version desktop et mobile */}
+          <EnhancedNavbar
+            activities={activities}
+            filteredActivities={filteredActivities}
+            animators={animators}
+            currentWeekDates={currentWeekDates}
+            setShowActivityModal={setShowActivityModal}
+            setShowAnimatorModal={setShowAnimatorModal}
+            setShowAnimatorsListModal={setShowAnimatorsListModal}
+            setShowStatsDashboardModal={setShowStatsDashboardModal}
+            setShowSyncModal={setShowSyncModal}
+            handleClearAllActivities={handleClearAllActivities}
+            ExportButton={ExportButton}
+          />
         </div>
       </header>
 
