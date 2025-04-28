@@ -643,48 +643,6 @@
   color: var(--dark-text);
 }
 
-.export-button {
-  background: linear-gradient(135deg, var(--success-color), #20a090);
-  color: white;
-  border: none;
-  border-radius: var(--border-radius-sm);
-  padding: 10px 20px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 0.9rem;
-  transition: var(--transition);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.export-button::before {
-  content: "";
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'%3E%3C/path%3E%3Cpolyline points='7 10 12 15 17 10'%3E%3C/polyline%3E%3Cline x1='12' y1='15' x2='12' y2='3'%3E%3C/line%3E%3C/svg%3E");
-  background-size: cover;
-}
-
-.export-button:hover {
-  background: linear-gradient(135deg, #20a090, var(--success-color));
-  transform: translateY(-2px);
-  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
-}
-
-.export-button:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.export-button:disabled {
-  background: linear-gradient(135deg, #a0a0a0, #808080);
-  cursor: not-allowed;
-  box-shadow: none;
-}
-
 .close-button {
   background: rgba(255, 255, 255, 0.1);
   border: none;

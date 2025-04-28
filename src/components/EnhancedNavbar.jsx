@@ -151,7 +151,9 @@ export default function EnhancedNavbar({
                           className="mobile-action-wrapper"
                           onClick={() => setMobileMenuOpen(false)}
                         >
-                          <ActionComponent />
+                          <div style={{ color: action.color || group.color }}>
+                            <ActionComponent />
+                          </div>
                         </div>
                       );
                     }
@@ -161,6 +163,7 @@ export default function EnhancedNavbar({
                         key={`action-${index}`}
                         className="mobile-action"
                         onClick={() => handleMobileAction(action.onClick)}
+                        style={{ color: action.color || group.color }}
                       >
                         {action.icon || group.icon} {action.label}
                       </button>
@@ -206,7 +209,9 @@ export default function EnhancedNavbar({
                       key={`component-${index}`}
                       className="dropdown-component"
                     >
-                      <ActionComponent />
+                      <div style={{ color: group.color }}>
+                        <ActionComponent />
+                      </div>
                     </div>
                   );
                 }
@@ -219,7 +224,7 @@ export default function EnhancedNavbar({
                       setDropdownOpen(false);
                       action.onClick();
                     }}
-                    style={action.color ? { color: action.color } : {}}
+                    style={{ color: action.color || group.color }}
                   >
                     {action.icon || group.icon} {action.label}
                   </button>

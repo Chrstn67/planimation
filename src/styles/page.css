@@ -34,7 +34,7 @@
 
 .container header {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   margin-bottom: 30px;
   flex-wrap: wrap;
@@ -77,61 +77,6 @@
   font-size: 1.2rem;
 }
 
-/* Couleurs des boutons */
-.add-button {
-  background-color: #4caf50;
-  color: white;
-}
-
-.add-button:hover {
-  background-color: #45a049;
-}
-
-.view-button {
-  background-color: #ff9800;
-  color: white;
-}
-
-.view-button:hover {
-  background-color: #e68900;
-}
-
-.sync-button {
-  background-color: #4a90e2;
-  color: white;
-}
-
-.sync-button:hover {
-  background-color: #3a80d2;
-}
-
-.clear-button {
-  background-color: #ff4d4d;
-  color: white;
-}
-
-.clear-button:hover {
-  background-color: #ff1a1a;
-}
-
-.stats-button {
-  background-color: #9c27b0;
-  color: white;
-}
-
-.stats-button:hover {
-  background-color: #7b1fa2;
-}
-
-.export-button {
-  background-color: #ff9800;
-  color: white;
-}
-
-.export-button:hover {
-  background-color: #e68900;
-}
-
 @media (max-width: 768px) {
   .container {
     padding: 10px;
@@ -139,7 +84,7 @@
 
   .container header {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
   }
 
   .container header h1 {
@@ -177,6 +122,7 @@ body {
   flex-direction: column;
   gap: 10px;
   width: 100%;
+  align-items: center;
 }
 
 .filter-indicator {

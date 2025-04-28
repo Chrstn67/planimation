@@ -93,17 +93,53 @@
   align-items: center;
   gap: 10px;
   font-weight: 500;
-  color: #333;
   transition: background-color 0.2s ease;
+  position: relative;
+}
+
+/* Bande de couleur avec before */
+.dropdown-action::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: currentColor;
+  opacity: 0.7;
+  transition: opacity 0.2s ease, width 0.2s ease;
+}
+
+.dropdown-action:hover::before {
+  opacity: 1;
+  width: 6px;
 }
 
 .dropdown-action:hover {
-  background-color: #f5f5f5;
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 /* Pour le composant ExportButton */
 .dropdown-component {
   padding: 5px 10px;
+  position: relative;
+}
+
+.dropdown-component::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: currentColor;
+  opacity: 0.7;
+  transition: opacity 0.2s ease, width 0.2s ease;
+}
+
+.dropdown-component:hover::before {
+  opacity: 1;
+  width: 6px;
 }
 
 .dropdown-component button {
@@ -112,12 +148,12 @@
   padding: 7px 6px;
   background-color: transparent !important;
   box-shadow: none !important;
-  color: #333 !important;
   font-weight: normal;
+  color: #767686;
 }
 
 .dropdown-component button:hover {
-  background-color: #f5f5f5 !important;
+  background-color: rgba(0, 0, 0, 0.05) !important;
 }
 
 /* ===== STYLES MOBILE ===== */
@@ -198,9 +234,27 @@
   align-items: center;
   gap: 10px;
   font-weight: 500;
-  color: #333;
   transition: background-color 0.2s ease;
   border-bottom: 1px solid #eee;
+  position: relative;
+}
+
+/* Bande de couleur avec before pour mobile */
+.mobile-action::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: currentColor;
+  opacity: 0.7;
+  transition: opacity 0.2s ease, width 0.2s ease;
+}
+
+.mobile-action:hover::before {
+  opacity: 1;
+  width: 6px;
 }
 
 .mobile-action:last-child {
@@ -208,12 +262,30 @@
 }
 
 .mobile-action:hover {
-  background-color: #f0f0f0;
+  background-color: rgba(0, 0, 0, 0.03);
 }
 
 .mobile-action-wrapper {
   padding: 8px 16px;
   border-bottom: 1px solid #eee;
+  position: relative;
+}
+
+.mobile-action-wrapper::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: currentColor;
+  opacity: 0.7;
+  transition: opacity 0.2s ease, width 0.2s ease;
+}
+
+.mobile-action-wrapper:hover::before {
+  opacity: 1;
+  width: 6px;
 }
 
 .mobile-action-wrapper:last-child {
@@ -225,9 +297,21 @@
   text-align: left;
   background-color: transparent !important;
   box-shadow: none !important;
-  color: #333 !important;
   padding: 4px 0 !important;
   font-weight: normal;
+  color: #767686;
+}
+
+/* Couleurs subtiles pour les sous-items */
+.dropdown-action svg,
+.mobile-action svg {
+  opacity: 0.85;
+}
+
+/* Effet hover subtil basé sur la couleur parente */
+.dropdown-action:hover,
+.mobile-action:hover {
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 /* ===== RESPONSIVE LAYOUT ===== */
