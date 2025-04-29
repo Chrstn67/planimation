@@ -18,7 +18,7 @@ export default function AnimationSheetModal({ activity, animators, onClose }) {
     return {
       ...currentActivity,
       materials: currentActivity.materials || "",
-      objectives: currentActivity.objectives || "",
+
       preparation: currentActivity.preparation || "",
       evaluation: currentActivity.evaluation || "",
       description: currentActivity.description || "",
@@ -200,8 +200,12 @@ export default function AnimationSheetModal({ activity, animators, onClose }) {
 
     // Sections de la fiche
     const sections = [
-      { title: "Description", content: formData.description, icon: "💡" },
-      { title: "Objectifs", content: formData.objectives, icon: "🎯" },
+      {
+        title: "Description et Objectifs",
+        content: formData.description,
+        icon: "🎯",
+      },
+
       { title: "Matériel nécessaire", content: formData.materials, icon: "📋" },
       { title: "Déroulement", content: formData.deroulement, icon: "📝" },
       { title: "Préparation", content: formData.preparation, icon: "⚙️" },
@@ -355,7 +359,7 @@ export default function AnimationSheetModal({ activity, animators, onClose }) {
 
             <form className="animation-sheet-form">
               <div className="form-group">
-                <label htmlFor="description">Description</label>
+                <label htmlFor="description">Description et Objectifs</label>
                 <textarea
                   id="description"
                   name="description"
@@ -375,18 +379,6 @@ export default function AnimationSheetModal({ activity, animators, onClose }) {
                   onChange={handleChange}
                   rows="3"
                   placeholder="Listez le matériel nécessaire pour cette activité..."
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="objectives">Objectifs</label>
-                <textarea
-                  id="objectives"
-                  name="objectives"
-                  value={formData.objectives}
-                  onChange={handleChange}
-                  rows="3"
-                  placeholder="Quels sont les objectifs de cette activité?"
                 />
               </div>
 

@@ -244,7 +244,7 @@ export default function HelpModal({ onClose }) {
                   </li>
                   <li>
                     <strong>Éditer</strong> : Complétez les différentes sections
-                    (matériel, objectifs, description, etc.)
+                    (matériel, description et objectifs, etc.)
                   </li>
                   <li>
                     <strong>Exporter</strong> : Cliquez sur "Exporter en PDF"
