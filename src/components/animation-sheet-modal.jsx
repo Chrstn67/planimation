@@ -18,9 +18,9 @@ export default function AnimationSheetModal({ activity, animators, onClose }) {
     return {
       ...currentActivity,
       materials: currentActivity.materials || "",
-
       preparation: currentActivity.preparation || "",
       evaluation: currentActivity.evaluation || "",
+      // Utiliser la description existante de l'activité si disponible
       description: currentActivity.description || "",
       deroulement: currentActivity.deroulement || "",
     };
@@ -366,7 +366,7 @@ export default function AnimationSheetModal({ activity, animators, onClose }) {
                   value={formData.description}
                   onChange={handleChange}
                   rows="5"
-                  placeholder="Décrivez le déroulement de l'activité..."
+                  placeholder="Décrivez les objectifs et l'intérêt de l'activité..."
                 />
               </div>
 

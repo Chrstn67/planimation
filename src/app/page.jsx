@@ -15,7 +15,7 @@ import Footer from "../components/Footer";
 import AnimationSheetModal from "../components/animation-sheet-modal";
 import StatsDashboardModal from "../components/stats-dashboard-modal";
 import ActivityDuplicationModal from "../components/activity-duplication-modal";
-import EnhancedNavbar from "../components/EnhancedNavbar"; // Import du nouveau composant navbar
+import EnhancedNavbar from "../components/EnhancedNavbar";
 
 import "../styles/page.css";
 
@@ -127,11 +127,60 @@ export default function Home() {
     setShowDetailsModal(true);
   };
 
+  // Fonction modifiée pour prendre en compte la date courante lors de l'ajout depuis la navbar
   const handleAddActivity = (newActivity) => {
     const id =
       activities.length > 0 ? Math.max(...activities.map((a) => a.id)) + 1 : 1;
-    const activityWithId = { ...newActivity, id };
-    const updatedActivities = [...activities, activityWithId];
+
+    // Déterminer les dates en fonction du jour sélectionné
+    let activityWithDate = { ...newActivity, id };
+
+    // Si l'activité n'a pas de date (ajout depuis la navbar), utiliser les dates de la semaine en cours
+    if (!activityWithDate.fullDate) {
+      const days = [
+        "Lundi",
+        "Mardi",
+        "Mercredi",
+        "Jeudi",
+        "Vendredi",
+        "Samedi",
+        "Dimanche",
+      ];
+      const dayIndex = days.indexOf(activityWithDate.day);
+
+      // Si les dates de la semaine sont disponibles et le jour est valide
+      if (
+        currentWeekDates.dates &&
+        currentWeekDates.dates.length > 0 &&
+        dayIndex !== -1 &&
+        dayIndex < currentWeekDates.dates.length
+      ) {
+        const fullDate = new Date(currentWeekDates.dates[dayIndex]);
+        activityWithDate.fullDate = fullDate;
+
+        // Calculer les dates pour les activités multi-jours
+        if (activityWithDate.multiDay) {
+          const endDayIndex = days.indexOf(
+            activityWithDate.endDay || activityWithDate.day
+          );
+          const dates = [];
+
+          for (
+            let i = dayIndex;
+            i <= endDayIndex && i < currentWeekDates.dates.length;
+            i++
+          ) {
+            dates.push(new Date(currentWeekDates.dates[i]));
+          }
+
+          activityWithDate.dates = dates;
+        } else {
+          activityWithDate.dates = [fullDate];
+        }
+      }
+    }
+
+    const updatedActivities = [...activities, activityWithDate];
     setActivities(updatedActivities);
     setShowActivityModal(false);
   };
