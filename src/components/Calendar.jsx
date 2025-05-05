@@ -520,6 +520,9 @@ export default function Calendar({
       <div className="calendar-header">
         <div className="header-top-section">
           <div className="week-navigation">
+            <button className="today-button" onClick={goToToday}>
+              <CalendarIcon size={14} /> Aujourd'hui
+            </button>
             <button onClick={() => changeWeek(-1)}>
               <ChevronLeft size={16} /> Semaine précédente
             </button>
@@ -530,9 +533,6 @@ export default function Calendar({
                     "fr-FR"
                   )} - ${weekDates.dates[4].toLocaleDateString("fr-FR")}`}
               </span>
-              <button className="today-button" onClick={goToToday}>
-                <CalendarIcon size={14} /> Aujourd'hui
-              </button>
             </div>
             <button onClick={() => changeWeek(1)}>
               Semaine suivante <ChevronRight size={16} />
