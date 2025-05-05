@@ -69,6 +69,7 @@ export default function DataSyncManager({
           objectives: activity.objectives || "",
           preparation: activity.preparation || "",
           evaluation: activity.evaluation || "",
+          lastUpdated: activity.lastUpdated || new Date().toISOString(),
         }));
 
         dataToExport = {
@@ -124,6 +125,88 @@ export default function DataSyncManager({
     }
   };
 
+  // Fonction pour fusionner intelligemment les activités
+  const mergeActivities = (existingActivities, importedActivities) => {
+    // Créer une map des activités existantes pour un accès rapide
+    const existingMap = new Map();
+    existingActivities.forEach((activity) => {
+      existingMap.set(activity.id, activity);
+    });
+
+    // Tableau pour stocker les activités fusionnées
+    const mergedActivities = [...existingActivities];
+
+    // Tableau pour suivre les IDs des activités importées déjà traitées
+    const processedIds = new Set();
+
+    // Parcourir les activités importées
+    importedActivities.forEach((importedActivity) => {
+      // Vérifier si l'activité existe déjà
+      if (existingMap.has(importedActivity.id)) {
+        const existingActivity = existingMap.get(importedActivity.id);
+
+        // Comparer les dates de dernière mise à jour
+        const existingDate = new Date(existingActivity.lastUpdated || 0);
+        const importedDate = new Date(importedActivity.lastUpdated || 0);
+
+        // Si l'activité importée est plus récente, la mettre à jour
+        if (importedDate > existingDate) {
+          // Trouver l'index de l'activité existante
+          const index = mergedActivities.findIndex(
+            (a) => a.id === importedActivity.id
+          );
+          if (index !== -1) {
+            // Remplacer l'activité existante par l'importée
+            mergedActivities[index] = {
+              ...importedActivity,
+              // Conserver certaines propriétés locales si nécessaire
+              // Par exemple, des notes locales ou des statuts spécifiques
+            };
+          }
+        }
+
+        // Marquer l'ID comme traité
+        processedIds.add(importedActivity.id);
+      } else {
+        // C'est une nouvelle activité, l'ajouter
+        mergedActivities.push({
+          ...importedActivity,
+          lastUpdated: importedActivity.lastUpdated || new Date().toISOString(),
+        });
+
+        // Marquer l'ID comme traité
+        processedIds.add(importedActivity.id);
+      }
+    });
+
+    return mergedActivities;
+  };
+
+  // Fonction pour fusionner les animateurs
+  const mergeAnimators = (existingAnimators, importedAnimators) => {
+    // Créer une map des animateurs existants
+    const existingMap = new Map();
+    existingAnimators.forEach((animator) => {
+      existingMap.set(animator.id, animator);
+    });
+
+    // Tableau pour stocker les animateurs fusionnés
+    const mergedAnimators = [...existingAnimators];
+
+    // Parcourir les animateurs importés
+    importedAnimators.forEach((importedAnimator) => {
+      // Vérifier si l'animateur existe déjà
+      if (!existingMap.has(importedAnimator.id)) {
+        // C'est un nouvel animateur, l'ajouter
+        mergedAnimators.push(importedAnimator);
+      }
+      // Note: On pourrait aussi implémenter une logique de mise à jour
+      // des animateurs existants si nécessaire
+    });
+
+    return mergedAnimators;
+  };
+
   const handleFileImport = (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -147,19 +230,24 @@ export default function DataSyncManager({
           );
         }
 
-        // Importer les données (activités, animateurs et description)
-        onDataImport(
-          importedData.activities,
-          importedData.animators,
-          importedData.description
+        // Fusionner les données au lieu de les remplacer
+        const mergedActivities = mergeActivities(
+          activities,
+          importedData.activities
+        );
+        const mergedAnimators = mergeAnimators(
+          animators,
+          importedData.animators
         );
 
-        // Afficher un message approprié
-        const message = importedData.isPartial
-          ? "Données de la semaine importées avec succès!"
-          : "Données importées avec succès!";
+        // Utiliser la description importée si elle existe, sinon garder l'existante
+        const mergedDescription = importedData.description || description;
 
-        setSuccess(message);
+        // Importer les données fusionnées
+        onDataImport(mergedActivities, mergedAnimators, mergedDescription);
+
+        // Afficher un message approprié
+        setSuccess("Données fusionnées avec succès!");
         setTimeout(() => setSuccess(""), 3000);
       } catch (err) {
         console.error("Erreur lors de l'importation:", err);
@@ -236,16 +324,17 @@ export default function DataSyncManager({
                   recherchez et sélectionnez le fichier <code>.json</code>
                 </li>
                 <li>
-                  Les données seront automatiquement importées et remplacent les
-                  données existantes
+                  Les données seront automatiquement fusionnées avec vos données
+                  existantes
                 </li>
               </ul>
             </li>
           </ol>
           <div className="sync-note">
-            <strong>Note :</strong> L'importation remplace toutes les données
-            existantes. Si vous souhaitez conserver certaines données,
-            assurez-vous de les exporter d'abord.
+            <strong>Note :</strong> L'importation fusionne intelligemment les
+            données. Les activités existantes ne sont mises à jour que si la
+            version importée est plus récente. Les nouvelles activités sont
+            ajoutées automatiquement.
           </div>
         </div>
       </div>
