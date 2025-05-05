@@ -8,6 +8,7 @@ export default function SyncModal({
   onClose,
   onDataImport,
   currentWeekDates,
+  description,
 }) {
   return (
     <div className="modal-overlay">
@@ -22,6 +23,7 @@ export default function SyncModal({
           <DataSyncManager
             activities={activities}
             animators={animators}
+            description={description}
             onDataImport={onDataImport}
             currentWeekDates={currentWeekDates}
           />
