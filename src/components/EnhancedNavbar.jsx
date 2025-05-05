@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import {
   FaPlus,
@@ -22,7 +24,7 @@ export default function EnhancedNavbar({
   setShowStatsDashboardModal,
   setShowSyncModal,
   handleClearAllActivities,
-  ExportButton,
+  // ExportButton n'est plus nécessaire ici, puisqu'il est déplacé vers le calendrier
 }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -55,6 +57,7 @@ export default function EnhancedNavbar({
   };
 
   // Groupe les boutons pour une meilleure organisation
+  // Nous supprimons l'option d'export du menu "Données"
   const actionGroups = [
     {
       id: "add",
@@ -99,16 +102,7 @@ export default function EnhancedNavbar({
           label: "Synchroniser",
           onClick: () => setShowSyncModal(true),
         },
-        {
-          label: "Exporter",
-          component: () => (
-            <ExportButton
-              activities={filteredActivities}
-              animators={animators}
-              currentWeekDates={currentWeekDates}
-            />
-          ),
-        },
+        // L'option d'export a été supprimée ici
         activities.length > 0 && {
           label: "Supprimer tout",
           onClick: handleClearAllActivities,

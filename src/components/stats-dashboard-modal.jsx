@@ -20,8 +20,6 @@ import {
   AreaChart,
   Area,
 } from "recharts";
-import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
 
 export default function StatsDashboardModal({
   activities,

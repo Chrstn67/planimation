@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import DragDropCalendar from "../components/drag-drop-calendar";
+import Calendar from "../components/Calendar"; // Importez le nouveau composant Calendar modifié
 import ActivityModal from "../components/ActivityModal";
 import AnimatorModal from "../components/AnimatorModal";
 import ActivityDetailsModal from "../components/ActivityDetailsModal";
@@ -133,7 +133,7 @@ export default function Home() {
       activities.length > 0 ? Math.max(...activities.map((a) => a.id)) + 1 : 1;
 
     // Déterminer les dates en fonction du jour sélectionné
-    let activityWithDate = { ...newActivity, id };
+    const activityWithDate = { ...newActivity, id };
 
     // Si l'activité n'a pas de date (ajout depuis la navbar), utiliser les dates de la semaine en cours
     if (!activityWithDate.fullDate) {
@@ -318,7 +318,7 @@ export default function Home() {
             />
           </div>
 
-          {/* Nouvelle navbar responsive intégrant à la fois la version desktop et mobile */}
+          {/* Navbar modifiée qui ne contient plus le bouton d'export */}
           <EnhancedNavbar
             activities={activities}
             filteredActivities={filteredActivities}
@@ -330,7 +330,7 @@ export default function Home() {
             setShowStatsDashboardModal={setShowStatsDashboardModal}
             setShowSyncModal={setShowSyncModal}
             handleClearAllActivities={handleClearAllActivities}
-            ExportButton={ExportButton}
+            // ExportButton a été supprimé d'ici
           />
         </div>
       </header>
@@ -350,13 +350,15 @@ export default function Home() {
         </div>
       )}
 
-      <DragDropCalendar
+      {/* Utilisation du composant Calendar modifié qui inclut maintenant le bouton d'export */}
+      <Calendar
         activities={filteredActivities}
         animators={animators}
         onActivityClick={handleActivityClick}
         onAddActivity={handleAddActivity}
-        onUpdateActivity={handleUpdateActivity}
         onWeekChange={updateCurrentWeek}
+        ExportButton={ExportButton} // Passage du composant ExportButton au calendrier
+        onUpdateActivity={handleUpdateActivity} // Ajout de la fonction pour le drag-and-drop
       />
 
       {showAnimatorsListModal && (

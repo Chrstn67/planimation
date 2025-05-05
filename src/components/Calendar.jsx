@@ -1,16 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import "../styles/calendar.css";
+import "../styles/drag-drop.css";
 import React from "react";
 import ActivityModal from "./ActivityModal";
 import {
   ChevronLeft,
   ChevronRight,
-  Calendar as CalendarIcon,
+  CalendarIcon,
+  GripVertical,
 } from "lucide-react";
 
-// Nouveau composant pour la modale de description
+// Composant pour la modale de description
 const DescriptionModal = ({ description, title, onClose }) => {
   return (
     <div className="description-modal-overlay" onClick={onClose}>
@@ -50,7 +52,9 @@ export default function Calendar({
   description,
   onActivityClick,
   onAddActivity,
-  onWeekChange, // Nouvelle prop pour partager les dates avec le parent
+  onWeekChange, // Prop pour partager les dates avec le parent
+  ExportButton, // Nouveau prop pour le bouton d'export
+  onUpdateActivity, // Nouvelle prop pour mettre à jour une activité après drag-and-drop
 }) {
   const [currentView, setCurrentView] = useState("week");
   const [selectedDay, setSelectedDay] = useState("Lundi");
@@ -62,14 +66,7 @@ export default function Calendar({
     date: null,
   });
 
-  // Fonction pour traiter la sélection d'une date dans le sélecteur de date
-  const handleDateSelection = (event) => {
-    const selectedDate = new Date(event.target.value);
-    initWeekDates(selectedDate);
-    setShowDatePicker(false);
-  };
-
-  // Nouvel état pour la modale de description
+  // État pour la modale de description
   const [showDescriptionModal, setShowDescriptionModal] = useState(false);
   const [selectedDescription, setSelectedDescription] = useState({
     text: "",
@@ -81,6 +78,10 @@ export default function Calendar({
     startDate: new Date(),
     dates: [],
   });
+
+  // Add the drag-and-drop state variables after the existing state declarations (around line 30)
+  const [draggedActivity, setDraggedActivity] = useState(null);
+  const [dragOverInfo, setDragOverInfo] = useState(null);
 
   // Fonction pour gérer l'affichage de la modale de description
   const handleShowDescription = (e, description, title) => {
@@ -330,7 +331,7 @@ export default function Calendar({
     return false;
   };
 
-  // Ajouter cette fonction pour initialiser les dates de la semaine
+  // Fonction pour initialiser les dates de la semaine
   const initWeekDates = (startDate = new Date()) => {
     const dates = [];
     const start = new Date(startDate);
@@ -359,35 +360,197 @@ export default function Calendar({
     }
   };
 
-  // Ajouter cette fonction pour changer de semaine
+  // Fonction pour changer de semaine
   const changeWeek = (direction) => {
     const newStartDate = new Date(weekDates.startDate);
     newStartDate.setDate(newStartDate.getDate() + direction * 7);
     initWeekDates(newStartDate);
   };
 
-  // Ajouter un useEffect pour initialiser les dates au chargement
+  // Fonction pour vérifier si un jour correspond à la date du jour
+  const isToday = (date) => {
+    if (!date) return false;
+    const today = new Date();
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    );
+  };
+
+  // Initialiser les dates au chargement
   React.useEffect(() => {
     initWeekDates();
   }, []);
 
+  // Aller à aujourd'hui
+  const goToToday = () => {
+    initWeekDates(new Date());
+  };
+
   // Filtrer les jours à afficher en fonction de la vue
   const daysToShow = currentView === "week" ? days : [selectedDay];
 
+  // Add these utility functions for drag-and-drop time calculations (after the existing utility functions)
+  // Fonction pour calculer la durée d'une activité en minutes
+  const calculateDurationInMinutes = (startTime, endTime) => {
+    const start = new Date(`2000-01-01T${startTime}`);
+    let end = new Date(`2000-01-01T${endTime}`);
+
+    if (endTime === "00:00") {
+      end = new Date(`2000-01-02T00:00`);
+    }
+
+    return (end - start) / (1000 * 60);
+  };
+
+  // Fonction pour convertir des minutes en format "HH:MM"
+  const minutesToTimeFormat = (minutes) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return `${hours.toString().padStart(2, "0")}:${mins
+      .toString()
+      .padStart(2, "0")}`;
+  };
+
+  // Fonction utilitaire pour convertir les heures en minutes
+  const timeToMinutes = (timeStr) => {
+    const [hours, minutes] = timeStr.split(":").map(Number);
+    return hours * 60 + minutes;
+  };
+
+  // Add these drag-and-drop event handlers (before the return statement)
+  // Fonctions pour le glisser-déposer
+  const handleDragStart = (e, activity) => {
+    setDraggedActivity(activity);
+    e.dataTransfer.setData("text/plain", activity.id);
+
+    // Ajouter une classe pour le style pendant le drag
+    e.currentTarget.classList.add("dragging");
+  };
+
+  const handleDragEnd = (e) => {
+    e.currentTarget.classList.remove("dragging");
+    setDraggedActivity(null);
+    setDragOverInfo(null);
+  };
+
+  const handleDragOver = (e, day, time) => {
+    e.preventDefault();
+    setDragOverInfo({ day, time });
+  };
+
+  const handleDrop = (e, day, time) => {
+    e.preventDefault();
+
+    if (!draggedActivity) return;
+
+    // Calculer la différence de jours
+    const oldDayIndex = days.indexOf(draggedActivity.day);
+    const newDayIndex = days.indexOf(day);
+    const dayDiff = newDayIndex - oldDayIndex;
+
+    // Créer une copie de l'activité avec les nouvelles dates
+    const updatedActivity = { ...draggedActivity };
+
+    // Calculer la durée de l'activité originale en minutes
+    const durationMinutes = calculateDurationInMinutes(
+      draggedActivity.startTime,
+      draggedActivity.endTime
+    );
+
+    // Mettre à jour le jour de début
+    updatedActivity.day = day;
+
+    // Si c'est une activité multi-jours, ajuster aussi le jour de fin
+    if (updatedActivity.multiDay && updatedActivity.endDay) {
+      const endDayIndex = days.indexOf(updatedActivity.endDay);
+      const newEndDayIndex = endDayIndex + dayDiff;
+
+      if (newEndDayIndex >= 0 && newEndDayIndex < days.length) {
+        updatedActivity.endDay = days[newEndDayIndex];
+      } else {
+        // Si le jour de fin sort des limites, ajuster
+        updatedActivity.endDay =
+          newEndDayIndex < 0 ? days[0] : days[days.length - 1];
+      }
+    } else if (!updatedActivity.multiDay) {
+      // Pour les activités d'un seul jour, s'assurer que endDay est le même que day
+      updatedActivity.endDay = day;
+    }
+
+    // Mettre à jour l'heure de début avec l'heure du créneau où l'activité a été déposée
+    updatedActivity.startTime = time;
+
+    // Calculer la nouvelle heure de fin en ajoutant la durée originale
+    const startMinutes = timeToMinutes(time);
+    const endMinutes = startMinutes + durationMinutes;
+
+    // Gérer le cas où l'heure de fin dépasse minuit
+    if (endMinutes >= 24 * 60) {
+      updatedActivity.endTime = "00:00";
+    } else {
+      updatedActivity.endTime = minutesToTimeFormat(endMinutes);
+    }
+
+    // Mettre à jour la date complète pour le nouveau jour de début
+    const newDayStartIdx = days.indexOf(day);
+    if (weekDates.dates[newDayStartIdx]) {
+      // Créer une nouvelle date pour la date de début
+      updatedActivity.fullDate = new Date(weekDates.dates[newDayStartIdx]);
+
+      // Recalculer toutes les dates pour l'activité
+      updatedActivity.dates = calculateActivityDates(
+        updatedActivity.fullDate,
+        updatedActivity.day,
+        updatedActivity.endDay
+      );
+    }
+
+    // Appeler la fonction de mise à jour
+    onUpdateActivity(updatedActivity);
+
+    // Réinitialiser les états de drag
+    setDraggedActivity(null);
+    setDragOverInfo(null);
+  };
+
   return (
     <div className="calendar-container">
-      {/* Remplacer la section calendar-header par celle-ci pour ajouter la navigation entre semaines */}
       <div className="calendar-header">
-        <div className="week-navigation">
-          <button onClick={() => changeWeek(-1)}>Semaine précédente</button>
-          <span className="current-week">
-            {weekDates.dates.length > 0 &&
-              `${weekDates.dates[0].toLocaleDateString(
-                "fr-FR"
-              )} - ${weekDates.dates[4].toLocaleDateString("fr-FR")}`}
-          </span>
-          <button onClick={() => changeWeek(1)}>Semaine suivante</button>
+        <div className="header-top-section">
+          <div className="week-navigation">
+            <button onClick={() => changeWeek(-1)}>
+              <ChevronLeft size={16} /> Semaine précédente
+            </button>
+            <div className="central-controls">
+              <span className="current-week">
+                {weekDates.dates.length > 0 &&
+                  `${weekDates.dates[0].toLocaleDateString(
+                    "fr-FR"
+                  )} - ${weekDates.dates[4].toLocaleDateString("fr-FR")}`}
+              </span>
+              <button className="today-button" onClick={goToToday}>
+                <CalendarIcon size={14} /> Aujourd'hui
+              </button>
+            </div>
+            <button onClick={() => changeWeek(1)}>
+              Semaine suivante <ChevronRight size={16} />
+            </button>
+          </div>
+
+          {/* Section dédiée au bouton d'export */}
+          <div className="export-section">
+            {ExportButton && (
+              <ExportButton
+                activities={activities}
+                animators={animators}
+                currentWeekDates={weekDates}
+              />
+            )}
+          </div>
         </div>
+
         <div className="view-selector">
           <button
             className={currentView === "week" ? "active" : ""}
@@ -419,163 +582,194 @@ export default function Calendar({
           ))}
         </div>
 
-        {daysToShow.map((day) => (
-          <div key={day} className="day-column">
-            {/* Remplacer la section day-header dans la boucle daysToShow.map par celle-ci pour afficher les dates */}
-            <div className="day-header">
-              <div className="day-name">{day}</div>
-              <div className="day-date">
-                {weekDates.dates.length > 0 &&
-                  weekDates.dates[days.indexOf(day)].toLocaleDateString(
-                    "fr-FR",
-                    { day: "numeric", month: "short" }
+        {daysToShow.map((day) => {
+          const dayIndex = days.indexOf(day);
+          const dayDate = weekDates.dates[dayIndex];
+          const isDayToday = isToday(dayDate);
+
+          return (
+            <div
+              key={day}
+              className={`day-column ${isDayToday ? "today-column" : ""}`}
+            >
+              <div className={`day-header ${isDayToday ? "today-header" : ""}`}>
+                <div className="day-name">{day}</div>
+                <div className="day-date">
+                  {weekDates.dates.length > 0 &&
+                    dayDate.toLocaleDateString("fr-FR", {
+                      day: "numeric",
+                      month: "short",
+                    })}
+                  {isDayToday && (
+                    <span className="today-badge">Aujourd'hui</span>
                   )}
+                </div>
               </div>
-            </div>
 
-            {timeSlots.slice(0, -1).map((startTime, index) => {
-              const endTime = timeSlots[index + 1];
-              const slotActivities = getActivitiesForTimeSlot(
-                day,
-                startTime,
-                endTime
-              );
+              {timeSlots.slice(0, -1).map((startTime, index) => {
+                const endTime = timeSlots[index + 1];
+                const slotActivities = getActivitiesForTimeSlot(
+                  day,
+                  startTime,
+                  endTime
+                );
+                const isDragOver =
+                  dragOverInfo &&
+                  dragOverInfo.day === day &&
+                  dragOverInfo.time === startTime;
 
-              return (
-                /* Remplacer la section qui affiche les activités dans la boucle timeSlots.slice(0, -1).map par celle-ci */
-                <div
-                  key={index}
-                  className="time-slot"
-                  onClick={() => handleTimeSlotClick(day, startTime)}
-                >
-                  <div className="activities-container">
-                    {slotActivities.map((activity, activityIndex) => {
-                      // Déterminer si c'est la première occurrence de cette activité pour ce jour
-                      const isFirstOccurrence = isFirstOccurrenceOfDay(
-                        activity,
-                        day,
-                        startTime
-                      );
-
-                      // Déterminer si cette activité doit être fusionnée avec la précédente
-                      const prevStartTime =
-                        index > 0 ? timeSlots[index - 1] : null;
-                      const shouldMerge =
-                        prevStartTime &&
-                        shouldMergeWithPrevious(
+                return (
+                  <div
+                    key={index}
+                    className={`time-slot ${isDayToday ? "today-slot" : ""} ${
+                      isDragOver ? "drag-over" : ""
+                    }`}
+                    onClick={() => handleTimeSlotClick(day, startTime)}
+                    onDragOver={(e) => handleDragOver(e, day, startTime)}
+                    onDrop={(e) => handleDrop(e, day, startTime)}
+                  >
+                    <div className="activities-container">
+                      {slotActivities.map((activity, activityIndex) => {
+                        // Déterminer si c'est la première occurrence de cette activité pour ce jour
+                        const isFirstOccurrence = isFirstOccurrenceOfDay(
                           activity,
                           day,
-                          startTime,
-                          prevStartTime
+                          startTime
                         );
 
-                      // Si l'activité doit être fusionnée et ce n'est pas la première occurrence, ne pas l'afficher
-                      if (shouldMerge && !isFirstOccurrence) {
-                        return null;
-                      }
+                        // Déterminer si cette activité doit être fusionnée avec la précédente
+                        const prevStartTime =
+                          index > 0 ? timeSlots[index - 1] : null;
+                        const shouldMerge =
+                          prevStartTime &&
+                          shouldMergeWithPrevious(
+                            activity,
+                            day,
+                            startTime,
+                            prevStartTime
+                          );
 
-                      // Déterminer l'heure de début et de fin pour ce jour
-                      let displayStartTime = startTime;
-                      let displayEndTime = endTime;
+                        // Si l'activité doit être fusionnée et ce n'est pas la première occurrence, ne pas l'afficher
+                        if (shouldMerge && !isFirstOccurrence) {
+                          return null;
+                        }
 
-                      const dayIndex = days.indexOf(day);
-                      const activityStartDayIndex = days.indexOf(activity.day);
-                      const activityEndDayIndex = days.indexOf(
-                        activity.endDay || activity.day
-                      );
+                        // Déterminer l'heure de début et de fin pour ce jour
+                        let displayStartTime = startTime;
+                        let displayEndTime = endTime;
 
-                      // Si c'est le jour de début de l'activité
-                      if (day === activity.day) {
-                        displayStartTime = activity.startTime;
-                      }
+                        const dayIndex = days.indexOf(day);
+                        const activityStartDayIndex = days.indexOf(
+                          activity.day
+                        );
+                        const activityEndDayIndex = days.indexOf(
+                          activity.endDay || activity.day
+                        );
 
-                      // Si c'est le jour de fin de l'activité
-                      if (day === (activity.endDay || activity.day)) {
-                        displayEndTime = activity.endTime;
-                      }
+                        // Si c'est le jour de début de l'activité
+                        if (day === activity.day) {
+                          displayStartTime = activity.startTime;
+                        }
 
-                      // Calculer la hauteur en fonction de la durée pour ce jour
-                      let activityHeight = calculateActivityHeight(
-                        day,
-                        displayStartTime,
-                        displayEndTime
-                      );
+                        // Si c'est le jour de fin de l'activité
+                        if (day === (activity.endDay || activity.day)) {
+                          displayEndTime = activity.endTime;
+                        }
 
-                      // Si l'activité continue le jour suivant et ce n'est pas le jour de fin
-                      if (activity.multiDay && dayIndex < activityEndDayIndex) {
-                        // L'activité continue jusqu'à minuit
-                        activityHeight = calculateActivityHeight(
+                        // Calculer la hauteur en fonction de la durée pour ce jour
+                        let activityHeight = calculateActivityHeight(
                           day,
                           displayStartTime,
-                          "00:00"
+                          displayEndTime
                         );
-                      }
 
-                      return (
-                        <div
-                          key={activity.id}
-                          className="activity"
-                          style={{
-                            backgroundColor: activity.color || "#e0e0e0",
-                            height: `${activityHeight}px`,
-                            top: `${calculateActivityTop(
-                              displayStartTime,
-                              startTime
-                            )}px`,
-                            width: `${
-                              95 / Math.max(1, slotActivities.length)
-                            }%`,
-                            left: `${
-                              (activityIndex * 95) /
-                              Math.max(1, slotActivities.length)
-                            }%`,
-                          }}
-                          onClick={(e) => {
-                            e.stopPropagation(); // Empêcher le déclenchement du clic sur la case
-                            onActivityClick(activity);
-                          }}
-                        >
-                          {isFirstOccurrence && (
-                            <>
-                              <h3>{activity.title}</h3>
-                              <p>
-                                {activity.day === day
-                                  ? activity.startTime
-                                  : "00:00"}{" "}
-                                -{" "}
-                                {activity.multiDay && day !== activity.endDay
-                                  ? "00:00"
-                                  : activity.endTime}
-                              </p>
-                              <p className="animators">
-                                {getAnimatorNames(activity.animators)}
-                              </p>
-                              {/* Remplacer l'affichage de la description par un bouton "Voir plus" */}
-                              <div className="description-button">
-                                <button
-                                  onClick={(e) =>
-                                    handleShowDescription(
-                                      e,
-                                      activity.description,
-                                      activity.title
-                                    )
-                                  }
-                                  className="view-more-btn"
-                                >
-                                  Voir description
-                                </button>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      );
-                    })}
+                        // Si l'activité continue le jour suivant et ce n'est pas le jour de fin
+                        if (
+                          activity.multiDay &&
+                          dayIndex < activityEndDayIndex
+                        ) {
+                          // L'activité continue jusqu'à minuit
+                          activityHeight = calculateActivityHeight(
+                            day,
+                            displayStartTime,
+                            "00:00"
+                          );
+                        }
+
+                        return (
+                          <div
+                            key={activity.id}
+                            className="activity"
+                            draggable={true}
+                            onDragStart={(e) => handleDragStart(e, activity)}
+                            onDragEnd={handleDragEnd}
+                            style={{
+                              backgroundColor: activity.color || "#e0e0e0",
+                              height: `${activityHeight}px`,
+                              top: `${calculateActivityTop(
+                                displayStartTime,
+                                startTime
+                              )}px`,
+                              width: `${
+                                95 / Math.max(1, slotActivities.length)
+                              }%`,
+                              left: `${
+                                (activityIndex * 95) /
+                                Math.max(1, slotActivities.length)
+                              }%`,
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation(); // Empêcher le déclenchement du clic sur la case
+                              onActivityClick(activity);
+                            }}
+                          >
+                            {isFirstOccurrence && (
+                              <>
+                                <div className="activity-header">
+                                  <h3>{activity.title}</h3>
+                                  <GripVertical
+                                    size={14}
+                                    className="drag-handle"
+                                  />
+                                </div>
+                                <p>
+                                  {activity.day === day
+                                    ? activity.startTime
+                                    : "00:00"}{" "}
+                                  -{" "}
+                                  {activity.multiDay && day !== activity.endDay
+                                    ? "00:00"
+                                    : activity.endTime}
+                                </p>
+                                <p className="animators">
+                                  {getAnimatorNames(activity.animators)}
+                                </p>
+                                <div className="description-button">
+                                  <button
+                                    onClick={(e) =>
+                                      handleShowDescription(
+                                        e,
+                                        activity.description,
+                                        activity.title
+                                      )
+                                    }
+                                    className="view-more-btn"
+                                  >
+                                    Voir description
+                                  </button>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        ))}
+                );
+              })}
+            </div>
+          );
+        })}
       </div>
 
       {/* Modal pour ajouter une activité en cliquant sur une case */}
@@ -590,7 +784,7 @@ export default function Calendar({
         />
       )}
 
-      {/* Nouvelle modale pour afficher la description complète */}
+      {/* Modale pour afficher la description complète */}
       {showDescriptionModal && (
         <DescriptionModal
           description={selectedDescription.text}
